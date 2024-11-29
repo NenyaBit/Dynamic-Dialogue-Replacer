@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Util.h"
 #include "Conditions/Conditional.h"
+#include "Util/FormLookup.h"
+#include "Util/StringUtil.h"
 
 using namespace Conditions;
 
@@ -59,8 +60,7 @@ namespace DDR
 			if (path[0] != '$')
 				return path;
 
-			auto sections = Util::Split(path, "\\"sv);
-
+			auto sections = Util::StringSplitToOwned(path, "\\"sv);
 			for (auto& section : sections) {
 				if (section == "[VOICE_TYPE]") {
 					section = a_voiceType->GetFormEditorID();
@@ -73,7 +73,7 @@ namespace DDR
 				}
 			}
 
-			return Util::Join(sections, "\\"sv); 
+			return Util::StringJoin(sections, "\\"sv); 
 		}
 		inline bool IsRand()
 		{
@@ -124,41 +124,27 @@ namespace YAML
 		static bool decode(const Node& node, TopicInfo& rhs)
 		{
 			const auto topicInfo = node["id"].as<std::string>();
-			if (const auto parsed = DDR::Util::ParseFormId(topicInfo)) {
-				const auto [formId, espName] = parsed.value();
-				rhs._topicInfoId = RE::TESDataHandler::GetSingleton()->LookupFormID(formId, espName);
-			} else {
+			rhs._topicInfoId = Util::FormFromString(topicInfo);
+			if (rhs._topicInfoId == 0) {
 				logger::info("failed to parse topic info");
 				return true;
 			}
-
 			rhs._responses = node["responses"].as<std::vector<Response>>(std::vector<Response>{});
 			rhs._priority = node["priority"].as<uint64_t>(0);
-
-
 			if (rhs._responses.empty()) {
 				logger::info("failed to find responses in replacement");
 				return true;
 			}
-
 			rhs._rawConditions = node["conditions"].as<std::vector<std::string>>(std::vector<std::string>{});
-			
 			const auto voiceTypes = node["voices"].as<std::vector<std::string>>(std::vector<std::string>{});
-
-			rhs._voiceTypes = voiceTypes 
-				| std::ranges::views::transform([](const std::string& m) {
-						return RE::TESForm::LookupByEditorID<RE::BGSVoiceType>(m);
-					}) 
-				| std::ranges::views::filter([](const RE::BGSVoiceType* a_voice) {
-						return a_voice != nullptr;
-					})
-				| std::ranges::to<std::vector>();
+			rhs._voiceTypes = voiceTypes |
+												std::ranges::views::transform([](const std::string& m) { return RE::TESForm::LookupByEditorID<RE::BGSVoiceType>(m); }) |
+												std::ranges::views::filter([](const RE::BGSVoiceType* a_voice) { return a_voice != nullptr; }) |
+												std::ranges::to<std::vector>();
 
 			rhs._random = node["random"].as<std::string>("") == "true";
 			rhs._cut = node["cut"].as<std::string>("true") == "true";
-
 			rhs._valid = true;
-			
 			return true;
 		}
 	};

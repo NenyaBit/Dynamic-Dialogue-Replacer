@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Conditions/Conditional.h"
-#include "Util.h"
+#include "Util/FormLookup.h"
 
 
 using namespace Conditions;
@@ -67,7 +67,7 @@ namespace YAML
 				return true;
 			}
 
-			if (const auto topic = Util::GetFormFromString<RE::TESTopic>(id)) {
+			if (const auto topic = Util::FormFromString<RE::TESTopic>(id)) {
 				rhs._id = topic->GetFormID();
 			} else {
 				logger::error("topic id must be valid");
@@ -78,11 +78,11 @@ namespace YAML
 			rhs._priority = node["priority"].as<uint64_t>(0);
 
 			const auto with = node["with"].as<std::string>("");
-			rhs._with = Util::GetFormFromString<RE::TESTopic>(with);
+			rhs._with = Util::FormFromString<RE::TESTopic>(with);
 
 			const auto inject = node["inject"].as<std::vector<std::string>>(std::vector<std::string>{});
 			for (const auto& str : inject) {
-				if (const auto topic = Util::GetFormFromString<RE::TESTopic>(str)) {
+				if (const auto topic = Util::FormFromString<RE::TESTopic>(str)) {
 					rhs._inject.push_back(topic);
 				}
 			}

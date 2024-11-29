@@ -89,8 +89,7 @@ int64_t Hooks::AddTopic(RE::MenuTopicManager* a_this, RE::TESTopic* a_topic, int
 	if (!a_topic)
 		return _AddTopic(a_this, a_topic, a_3, a_4);
 
-	const auto& target = Util::GetRef(a_this->speaker);
-
+	const auto target = a_this->speaker.get().get();
 	if (const auto& resp = DialogueManager::FindReplacementTopic(a_topic->GetFormID(), target, true)) {
 		bool flag = true;
 		if (resp->GetCheck()) {
@@ -137,7 +136,7 @@ RE::UI_MESSAGE_RESULTS DialogueMenuEx::ProcessMessageEx(RE::UIMessage& a_message
 	if (const auto menu = RE::MenuTopicManager::GetSingleton()) {		
 		// find dialogue target on start
 		if (a_message.type == RE::UI_MESSAGE_TYPE::kShow || a_message.type == RE::UI_MESSAGE_TYPE::kUpdate) {
-			_currentTarget = Util::GetRef(menu->speaker);
+			_currentTarget = menu->speaker.get().get();
 			_currId = -1;
 		}
 

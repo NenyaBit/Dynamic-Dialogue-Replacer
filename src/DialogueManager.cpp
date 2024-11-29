@@ -1,5 +1,7 @@
 #include "DialogueManager.h"
 
+#include "Util/Random.h"
+
 using namespace DDR;
 using namespace Conditions;
 
@@ -133,7 +135,7 @@ std::shared_ptr<TopicInfo> DialogueManager::FindReplacementResponse(RE::Characte
 		}
 
 		if (!candidates.empty()) {
-			return candidates[Util::GetRandInt(0, (int)candidates.size() - 1)];
+			return candidates[Random::draw<size_t>(0, candidates.size() - 1)];
 		}
 	}
 
@@ -166,7 +168,7 @@ std::string DialogueManager::AddReplacementTopic(RE::FormID a_topicId, std::stri
 {
 	std::unique_lock lock{ _tempTopicMutex };
 
-	std::string key{ Util::GenerateUUID() };
+	std::string key{ Random::generateUUID() };
 
 	if (_tempTopicKeys.count(a_topicId)) {
 		logger::info("overwrite detected on {} - previous key = {}", a_topicId, _tempTopicKeys.count(a_topicId));

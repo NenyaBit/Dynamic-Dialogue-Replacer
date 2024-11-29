@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ConditionUtil.h"
+#include "Util/FormLookup.h"
 
 // stolen from DAV (https://github.com/Exit-9B/DynamicArmorVariants)
 namespace Conditions
@@ -44,7 +44,7 @@ namespace Conditions
 			refMap["PLAYER"] = RE::PlayerCharacter::GetSingleton();
 
 			for (const auto& [key, value] : a_rawRefs) {
-				if (const auto form = ConditionUtil::GetFormFromString(value)) {
+				if (const auto form = Util::FormFromString<RE::TESForm>(value)) {
 					refMap[key] = form;
 				}
 			}
@@ -73,7 +73,7 @@ namespace Conditions
 				return it->second->As<T>();
 			}
 
-			return ConditionUtil::GetFormFromString<T>(a_text);
+			return Util::FormFromString<T>(a_text);
 		}
 	};
 }
