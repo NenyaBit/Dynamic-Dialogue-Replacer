@@ -1,7 +1,7 @@
 set_xmakever("2.9.5")
 
 -- Globals
-PROJECT_NAME = "mfgfix"
+PROJECT_NAME = "DynamicDialogueReplacer"
 
 -- Project
 set_project(PROJECT_NAME)
@@ -18,7 +18,7 @@ option_end()
 
 -- Dependencies & Includes
 -- https://github.com/xmake-io/xmake-repo/tree/dev
-add_requires("simpleini")
+add_requires("yaml-cpp")
 
 includes("lib/commonlibsse-ng")
 
@@ -54,7 +54,7 @@ set_config("skyrim_vr", true)
 -- Target
 target(PROJECT_NAME)
     -- Dependencies
-    add_packages("simpleini")
+    add_packages("yaml-cpp")
     add_deps("detours")
     add_includedirs("lib/detours/src")
 

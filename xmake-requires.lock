@@ -1,0 +1,55 @@
+{
+    __meta__ = {
+        version = "1.0"
+    },
+    ["windows|x64"] = {
+        ["cmake#31fecfc4"] = {
+            repo = {
+                branch = "master",
+                commit = "f6251c012faabeb21d64f50a41e892e56993e77e",
+                url = "https://github.com/xmake-io/xmake-repo.git"
+            },
+            version = "3.31.0-rc2"
+        },
+        ["directxmath#31fecfc4"] = {
+            repo = {
+                branch = "master",
+                commit = "f6251c012faabeb21d64f50a41e892e56993e77e",
+                url = "https://github.com/xmake-io/xmake-repo.git"
+            },
+            version = "2024.02"
+        },
+        ["directxtk#31fecfc4"] = {
+            repo = {
+                branch = "master",
+                commit = "f6251c012faabeb21d64f50a41e892e56993e77e",
+                url = "https://github.com/xmake-io/xmake-repo.git"
+            },
+            version = "24.2.0"
+        },
+        ["rapidcsv#31fecfc4"] = {
+            repo = {
+                branch = "master",
+                commit = "f6251c012faabeb21d64f50a41e892e56993e77e",
+                url = "https://github.com/xmake-io/xmake-repo.git"
+            },
+            version = "8.84"
+        },
+        ["spdlog#9c36f0a9"] = {
+            repo = {
+                branch = "master",
+                commit = "f6251c012faabeb21d64f50a41e892e56993e77e",
+                url = "https://github.com/xmake-io/xmake-repo.git"
+            },
+            version = "v1.14.1"
+        },
+        ["yaml-cpp#31fecfc4"] = {
+            repo = {
+                branch = "master",
+                commit = "f6251c012faabeb21d64f50a41e892e56993e77e",
+                url = "https://github.com/xmake-io/xmake-repo.git"
+            },
+            version = "0.8.0"
+        }
+    }
+}
