@@ -29,6 +29,7 @@ target("detours")
     add_includedirs("lib/detours/src")
     add_files("lib/detours/src/*.cpp")
     remove_files("lib/detours/src/uimports.cpp")
+    set_installdir("build/detours")
 target_end()
 
 -- policies
