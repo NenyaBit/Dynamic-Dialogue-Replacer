@@ -61,10 +61,7 @@ namespace Conditions
 			RE::BSString* str;
 		};
 
-		static auto ParseParam(
-			const std::string& a_text,
-			RE::SCRIPT_PARAM_TYPE a_type,
-			const RefMap& a_refs) -> ConditionParam;
+		static auto ParseParam(const std::string& a_text, RE::SCRIPT_PARAM_TYPE a_type, const RefMap& a_refs) -> ConditionParam;
 
 		template <typename T = RE::TESForm>
 		static auto LookupForm(const std::string& a_text, const RefMap& a_refs) -> T*
@@ -72,7 +69,6 @@ namespace Conditions
 			if (auto it = a_refs.find(a_text); it != a_refs.end()) {
 				return it->second->As<T>();
 			}
-
 			return Util::FormFromString<T>(a_text);
 		}
 	};

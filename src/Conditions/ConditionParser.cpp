@@ -43,7 +43,7 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	if (mParam1.matched) {
 		if (function->numParams >= 1) {
 			data.functionData.params[0] = std::bit_cast<void*>(
-				ParseParam(mParam1.str(), function->params[0].paramType.get(), a_refs));
+					ParseParam(mParam1.str(), function->params[0].paramType.get(), a_refs));
 		} else {
 			logger::warn("Condition function {} ignoring parameter: {}", function->functionName, mParam1.str());
 		}
@@ -52,7 +52,7 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	if (mParam2.matched) {
 		if (function->numParams >= 2) {
 			data.functionData.params[1] = std::bit_cast<void*>(
-				ParseParam(mParam2.str(), function->params[1].paramType.get(), a_refs));
+					ParseParam(mParam2.str(), function->params[1].paramType.get(), a_refs));
 		} else {
 			logger::warn("Condition function {} ignoring parameter: {}", function->functionName, mParam2.str());
 		}
@@ -110,10 +110,7 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	return conditionItem;
 }
 
-auto ConditionParser::ParseParam(
-	const std::string& a_text,
-	RE::SCRIPT_PARAM_TYPE a_type,
-	const RefMap& a_refs) -> ConditionParam
+auto ConditionParser::ParseParam(const std::string& a_text, RE::SCRIPT_PARAM_TYPE a_type, const RefMap& a_refs) -> ConditionParam
 {
 	ConditionParam param{};
 
@@ -146,7 +143,7 @@ auto ConditionParser::ParseParam(
 		{
 			param.str = new RE::BSString(a_text.c_str());
 			break;
-		}	
+		}
 	default:
 		param.form = LookupForm(textCIS, a_refs);
 		break;

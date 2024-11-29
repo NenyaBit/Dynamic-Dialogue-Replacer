@@ -57,7 +57,7 @@ public:
 	}
 
 private:
-	inline static const std::unordered_map<std::string, RE::ActorValue> ActorValueLookup{
+	inline static const std::map<std::string, RE::ActorValue> ActorValueLookup{
 		{ "AGGRESSION"s, RE::ActorValue::kAggression },
 		{ "CONFIDENCE"s, RE::ActorValue::kConfidence },
 		{ "ENERGY"s, RE::ActorValue::kEnergy },

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <unordered_set>
 #include "DialogueManager.h"
+#include <unordered_set>
 
 namespace RE
 {
@@ -16,10 +16,11 @@ namespace DDR
 	{
 	public:
 		static void Install();
+
 	private:
 		static int64_t PopulateTopicInfo(int64_t a_1, RE::TESTopic* a_2, RE::TESTopicInfo* a_3, RE::Character* a_4, RE::TESTopicInfo::ResponseData* a_5);
 		static inline PopulateTopicInfoType _PopulateTopicInfo;
-		
+
 		static char* SetSubtitle(RE::DialogueResponse* a_response, char* text, int32_t unk);
 		static inline REL::Relocation<decltype(SetSubtitle)> _SetSubtitle;
 
@@ -45,7 +46,7 @@ namespace DDR
 		}
 
 		RE::UI_MESSAGE_RESULTS ProcessMessageEx(RE::UIMessage& a_message);
-		
+
 	private:
 		using ProcessMessageFn = decltype(&RE::DialogueMenu::ProcessMessage);
 		static inline REL::Relocation<ProcessMessageFn> _ProcessMessageFn;
