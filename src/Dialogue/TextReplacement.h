@@ -17,12 +17,13 @@ namespace DDR
     ~TextReplacement() = default;
 
     _NODISCARD std::string_view GetScript() const { return _script; }
-    _NODISCARD bool CanApplyReplacement(RE::TESObjectREFR* a_speaker, ReplacemenType a_type) const;
+    _NODISCARD bool CanApplyReplacement(RE::TESObjectREFR* a_speaker, RE::TESObjectREFR* a_target, ReplacemenType a_type) const;
 
   private:
 		std::string _script;
 		RE::FormID _speakerId;
-    ReplacemenType _type;
+		RE::FormID _targetId;
+		ReplacemenType _type;
 
   public:
     bool operator<(const TextReplacement& a_rhs) const noexcept { return _script < a_rhs._script; };
