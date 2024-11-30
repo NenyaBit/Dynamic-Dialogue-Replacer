@@ -11,7 +11,7 @@
 namespace DDR
 {
 	constexpr static std::string_view DIRECTORY_PATH = "Data\\SKSE\\DynamicDialogueReplacer";
-	constexpr static std::string_view SCRIPT_PATH = "Data\\SKSE\\Plugins\\DynamicDialogueReplacer\\Scripts";
+	constexpr static std::string_view SCRIPT_PATH = "Data\\SKSE\\DynamicDialogueReplacer\\Scripts";
 
 	struct LuaData
 	{
@@ -34,11 +34,16 @@ namespace DDR
 	public:
 		static void Init();
 		static std::shared_ptr<TopicInfo> FindReplacementResponse(RE::Character* a_speaker, RE::TESTopicInfo* a_topicInfo, RE::TESTopicInfo::ResponseData* a_responseData);
-		static std::shared_ptr<Topic> FindReplacementTopic(RE::FormID a_id, RE::TESObjectREFR* a_target, bool a_full);
+		static std::shared_ptr<Topic> FindReplacementTopic(RE::FormID a_id, RE::TESObjectREFR* a_target, bool a_preprocessing);
 
 		static std::string AddReplacementTopic(RE::FormID a_topicId, std::string a_text);
 		static void RemoveReplacementTopic(RE::FormID a_topicId, std::string a_key);
 		static void ApplyTextReplacements(std::string& a_text, RE::TESObjectREFR* a_speaker, ReplacemenType a_type);
+
+	private:
+		static size_t ParseResponses(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
+		static size_t ParseTopics(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
+		static size_t ParseScripts(const YAML::Node& a_node);
 
 	private:
 		static inline LuaData _lua{};

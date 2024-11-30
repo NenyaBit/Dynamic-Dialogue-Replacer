@@ -12,21 +12,31 @@ namespace DDR
 		Topic(RE::FormID a_id, std::string a_text);
 		~Topic() = default;
 
+		/// @brief FormID of the affected topic
 		_NODISCARD RE::FormID GetId() { return _id; }
+		/// @brief Player response to replace the topic with
 		_NODISCARD const char* GetText() { return _text.c_str(); }
+		/// @brief If the topic should be hidden (no responses available)
 		_NODISCARD bool IsHidden() { return _hide; }
-		_NODISCARD bool IsFull() { return _with != nullptr || _hide || !_inject.empty(); }
+		/// @brief Is this topic relevant when pre-processing the affected dialogue topic 
+		_NODISCARD bool HasPreProcessingAction() { return _replaceWith != nullptr || _hide || !_inject.empty(); }
+		/// @brief If default processing should continue after edits have been applied (implied true on replacement and false on hide)
 		_NODISCARD bool ShouldProceed() { return _proceed; }
-		_NODISCARD RE::TESTopic* GetTopic() { return _with; }
+		/// @brief The topic to replace the affected topic with
+		_NODISCARD RE::TESTopic* GetReplacingTopic() { return _replaceWith; }
+		/// @brief Additional response topics to inject into the dialogue
 		_NODISCARD const std::vector<RE::TESTopic*>& GetInjections() { return _inject; }
+		/// @brief Verify existing conditions met before applying any overrides
+		_NODISCARD bool VerifyExistingConditions() { return _check; }
+		/// @brief Check if the conditions are met
+		_NODISCARD bool ConditionsMet(RE::TESObjectREFR* a_speaker, RE::TESObjectREFR* a_target) { return _conditions.ConditionsMet(a_speaker, a_target); }
+		/// @brief ¯\_(ツ)_/¯
 		_NODISCARD uint64_t GetPriority() { return _priority; }
-		_NODISCARD bool GetCheck() { return _check; }
-		_NODISCARD bool ConditionsMet(RE::TESObjectREFR* a_subject, RE::TESObjectREFR* a_target) { return _conditions.ConditionsMet(a_subject, a_target); }
 
 	private:
 		RE::FormID _id;
 		std::string _text;
-		RE::TESTopic* _with{ nullptr };
+		RE::TESTopic* _replaceWith{ nullptr };
 		std::vector<RE::TESTopic*> _inject{};
 		Conditions::Conditional _conditions{};
 		uint64_t _priority{ 0 };

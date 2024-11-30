@@ -156,7 +156,7 @@ namespace DDR
 		return nullptr;
 	}
 
-	std::shared_ptr<Topic> DialogueManager::FindReplacementTopic(RE::FormID a_id, RE::TESObjectREFR* a_target, bool a_full)
+	std::shared_ptr<Topic> DialogueManager::FindReplacementTopic(RE::FormID a_id, RE::TESObjectREFR* a_target, bool a_preprocessing)
 	{
 		if (_tempTopicMutex.try_lock()) {
 			if (_tempTopicReplacements.count(a_id)) {
@@ -167,7 +167,7 @@ namespace DDR
 		if (_topicReplacements.count(a_id)) {
 			const auto& replacements = _topicReplacements[a_id];
 			for (const auto& repl : replacements) {
-				if (repl->IsFull() == a_full && repl->ConditionsMet(RE::PlayerCharacter::GetSingleton(), a_target)) {
+				if (repl->HasPreProcessingAction() == a_preprocessing && repl->ConditionsMet(RE::PlayerCharacter::GetSingleton(), a_target)) {
 					return repl;
 				}
 			}
@@ -204,8 +204,10 @@ namespace DDR
 		if (a_text.empty()) {
 			return;
 		}
+		const auto actor = a_speaker ? a_speaker->As<RE::Actor>() : nullptr;
+		const auto target = actor ? GetDialogueTarget(actor) : nullptr;
 		_lua.ForEachScript([&](const TextReplacement& a_replacement, const sol::environment& a_env) {
-			if (a_replacement.CanApplyReplacement(a_speaker, a_type)) {
+			if (a_replacement.CanApplyReplacement(a_speaker, target, a_type)) {
 				sol::protected_function_result result = a_env["replace"](a_text);
 				if (!result.valid()) {
 					sol::error err = result;

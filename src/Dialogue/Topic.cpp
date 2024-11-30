@@ -7,7 +7,7 @@ namespace DDR
 		_text(a_node["text"].as<std::string>("")),
 		_priority(a_node["priority"].as<uint64_t>(0)),
 		_conditions(Conditions::Conditional{ a_node["conditions"].as<std::vector<std::string>>(std::vector<std::string>{}), a_refs }),
-		_with(Util::FormFromString<RE::TESTopic>(a_node["with"].as<std::string>(""))),
+		_replaceWith(Util::FormFromString<RE::TESTopic>(a_node["with"].as<std::string>(""))),
 		_inject(a_node["inject"].as<std::vector<std::string>>(std::vector<std::string>{}) |
 						std::ranges::views::transform([](const auto& str) { return Util::FormFromString<RE::TESTopic>(str); }) |
 						std::ranges::views::filter([](const auto it) { return it != nullptr; }) |
@@ -19,8 +19,7 @@ namespace DDR
 		if (_id == 0 || !RE::TESForm::LookupByID(_id)) {
 			throw std::runtime_error("Failed to obtain topic");
 		}
-		// COMEBACK: _inject is marked as "not empty" (!_inject.empty()) as a condition in the original implementation
-		if (_text.empty() && !_with && _inject.empty()) {
+		if (_text.empty() && !_replaceWith && _inject.empty() && !_hide) {
 			throw std::runtime_error("Failed to find text or with/inject topics in replacement");
 		}
 	}

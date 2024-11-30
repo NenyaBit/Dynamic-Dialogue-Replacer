@@ -88,39 +88,43 @@ namespace DDR
 			return _AddTopic(a_this, a_topic, a_3, a_4);
 		}
 		const auto target = a_this->speaker.get().get();
-		if (const auto& resp = DialogueManager::FindReplacementTopic(a_topic->GetFormID(), target, true)) {
-			bool flag = true;
-			if (resp->GetCheck()) {
-				flag = false;
-				auto currInfo = a_topic->topicInfos;
-				for (auto i = a_topic->numTopicInfos; i > 0; i--) {
-					if (currInfo && *currInfo) {
-						if ((*currInfo)->objConditions.IsTrue(target, RE::PlayerCharacter::GetSingleton())) {
-							flag = true;
-							break;
-						}
+		const auto& resp = DialogueManager::FindReplacementTopic(a_topic->GetFormID(), target, true);
+		if (!resp) {
+			return _AddTopic(a_this, a_topic, a_3, a_4);
+		}
+		if (resp->VerifyExistingConditions()) {
+			bool hasValidResponse = false;
+			auto currInfo = a_topic->topicInfos;
+			for (auto i = a_topic->numTopicInfos; i > 0; i--) {
+				if (currInfo && *currInfo) {
+					if ((*currInfo)->objConditions.IsTrue(target, RE::PlayerCharacter::GetSingleton())) {
+						hasValidResponse = true;
+						break;
 					}
-					currInfo++;
 				}
+				currInfo++;
 			}
-			if (flag) {
-				// hide topic
-				if (resp->IsHidden())
-					return 0;
-				// replace topic
-				const auto& repl = resp->GetTopic();
-				const auto& res = repl ? _AddTopic(a_this, repl, a_3, a_4) : 0;
-				// inject additional topics
-				const auto& injections = resp->GetInjections();
-				for (const auto& injectTopic : injections) {
-					_AddTopic(a_this, injectTopic, a_3, a_4);
-				}
-				if (res || !resp->ShouldProceed()) {
-					return res;
-				}
+			if (!hasValidResponse) {
+				return _AddTopic(a_this, a_topic, a_3, a_4);
 			}
 		}
-		return _AddTopic(a_this, a_topic, a_3, a_4);
+		// hide topic
+		if (resp->IsHidden()) {
+			return 0;
+		}
+		// replace topic
+		const auto& repl = resp->GetReplacingTopic();
+		const auto& res = repl ? _AddTopic(a_this, repl, a_3, a_4) : 0;
+		// inject additional topics
+		const auto& injections = resp->GetInjections();
+		for (const auto& injectTopic : injections) {
+			_AddTopic(a_this, injectTopic, a_3, a_4);
+		}
+		if (res || !resp->ShouldProceed()) {
+			return res;
+		} else {
+			return _AddTopic(a_this, a_topic, a_3, a_4);
+		}
 	}
 
 	RE::UI_MESSAGE_RESULTS DialogueMenuEx::ProcessMessageEx(RE::UIMessage& a_message)
