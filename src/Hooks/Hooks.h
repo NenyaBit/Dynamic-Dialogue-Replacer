@@ -18,6 +18,13 @@ namespace DDR
 		static void Install();
 
 	private:
+		struct Response
+		{
+			RE::Character* speaker{ nullptr };
+			std::shared_ptr<TopicInfo> response{ nullptr };
+			int32_t responseNumber{ -1 };
+		};
+
 		static int64_t PopulateTopicInfo(int64_t a_1, RE::TESTopic* a_2, RE::TESTopicInfo* a_3, RE::Character* a_4, RE::TESTopicInfo::ResponseData* a_5);
 		static inline PopulateTopicInfoType _PopulateTopicInfo;
 
@@ -27,8 +34,7 @@ namespace DDR
 		static bool ConstructResponse(RE::TESTopicInfo::ResponseData* a_response, char* a_filePath, RE::BGSVoiceType* a_voiceType, RE::TESTopic* a_topic, RE::TESTopicInfo* a_topicInfo);
 		static inline REL::Relocation<decltype(ConstructResponse)> _ConstructResponse;
 
-		thread_local static inline std::shared_ptr<TopicInfo> _response = nullptr;
-		thread_local static inline int _responseNumber = -1;
+		thread_local static inline Response _response{};
 
 	private:
 		static inline int64_t AddTopic(RE::MenuTopicManager* a_this, RE::TESTopic* a_topic, int64_t a_3, int64_t a_4);

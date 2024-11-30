@@ -22,8 +22,10 @@ namespace logger = SKSE::log;
 namespace fs = std::filesystem;
 using namespace std::literals;
 
-#include <yaml-cpp/yaml.h>
 #include <detours.h>
+#include <magic_enum.hpp>
+#include <yaml-cpp/yaml.h>
+static_assert(magic_enum::is_magic_enum_supported, "magic_enum is not supported");
 
 namespace stl
 {
