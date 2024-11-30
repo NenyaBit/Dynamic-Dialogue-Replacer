@@ -6,8 +6,6 @@ namespace DDR
 {
 	void DialogueManager::Init()
 	{
-		// TODO: parse all files in DynamicDialogueReplacer folder
-
 		logger::info("Initializing replacements");
 		std::error_code ec{};
 		if (!fs::exists(DIRECTORY_PATH, ec) || fs::is_empty(DIRECTORY_PATH, ec)) {
@@ -30,9 +28,8 @@ namespace DDR
 					try {
 						const auto repl = std::make_shared<TopicInfo>(it, refMap);
 						for (const auto& hash : repl->GetHashes()) {
-							_respReplacements[hash].emplace_back(_responses.back());
+							_responseReplacements[hash].emplace_back(repl);
 						}
-						_responses.push_back(repl);
 					} catch (std::exception& e) {
 						logger::info("Failed to load response replaccement - {}", e.what());
 					}
@@ -40,25 +37,22 @@ namespace DDR
 				for (const auto&& it : file["topics"]) {
 					try {
 						const auto repl = std::make_shared<Topic>(it, refMap);
-						_topicReplacements[repl->GetId()].emplace_back(_topics.back());
-						_topics.push_back(repl);
+						_topicReplacements[repl->GetId()].emplace_back(repl);
 					} catch (std::exception& e) {
 						logger::info("Failed to load topic replacement - {}", e.what());
 					}
 				}
-				logger::info("Loaded {} response replacements and {} topic replacements from {}", _respReplacements.size(), _topicReplacements.size(), fileName);
+				logger::info("Loaded {} response replacements and {} topic replacements from {}", _responseReplacements.size(), _topicReplacements.size(), fileName);
 			} catch (std::exception& e) {
 				logger::info("Failed to load {} - {}", fileName, e.what());
 			}
 		}
-
 		for (auto& [_, replacements] : _topicReplacements) {
 			std::ranges::sort(replacements, [](const auto& a, const auto& b) {
 				return a->GetPriority() > b->GetPriority();
 			});
 		}
-
-		for (auto& [_, replacements] : _respReplacements) {
+		for (auto& [_, replacements] : _responseReplacements) {
 			std::ranges::sort(replacements, [](const auto& a, const auto& b) {
 				return a->GetPriority() > b->GetPriority();
 			});
@@ -95,18 +89,18 @@ namespace DDR
 		const auto allKey = TopicInfo::GenerateHash(a_topicInfo->GetFormID());
 
 		// try stored overrides next
-		auto iter = _respReplacements.find(key);
-		if (iter == _respReplacements.end()) {
-			iter = _respReplacements.find(allKey);
+		auto iter = _responseReplacements.find(key);
+		if (iter == _responseReplacements.end()) {
+			iter = _responseReplacements.find(allKey);
 		}
 
-		if (iter != _respReplacements.end()) {
+		if (iter != _responseReplacements.end()) {
 			const auto& replacements = iter->second;
 
 			std::vector<std::shared_ptr<TopicInfo>> candidates;
 
 			for (const auto& repl : replacements) {
-				const auto rand = repl->IsRand();
+				const auto rand = repl->IsRandom();
 				if ((candidates.empty() || (rand && repl->GetPriority() >= candidates[0]->GetPriority())) && repl->ConditionsMet(speaker, target)) {
 					if (rand) {
 						candidates.push_back(repl);

@@ -27,11 +27,12 @@ namespace DDR
 		static bool ConstructResponse(RE::TESTopicInfo::ResponseData* a_response, char* a_filePath, RE::BGSVoiceType* a_voiceType, RE::TESTopic* a_topic, RE::TESTopicInfo* a_topicInfo);
 		static inline REL::Relocation<decltype(ConstructResponse)> _ConstructResponse;
 
-		static inline int64_t AddTopic(RE::MenuTopicManager* a_this, RE::TESTopic* a_topic, int64_t a_3, int64_t a_4);
-		static inline REL::Relocation<decltype(AddTopic)> _AddTopic;
-
 		thread_local static inline std::shared_ptr<TopicInfo> _response = nullptr;
 		thread_local static inline int _responseNumber = -1;
+
+	private:
+		static inline int64_t AddTopic(RE::MenuTopicManager* a_this, RE::TESTopic* a_topic, int64_t a_3, int64_t a_4);
+		static inline REL::Relocation<decltype(AddTopic)> _AddTopic;
 	};
 
 	class DialogueMenuEx : public RE::DialogueMenu

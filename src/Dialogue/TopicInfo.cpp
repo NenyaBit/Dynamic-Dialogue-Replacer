@@ -23,4 +23,47 @@ namespace DDR
 		}
 	}
 
-} // namespace DDR
+	std::string TopicInfo::GenerateHash(RE::FormID a_id, const RE::BGSVoiceType* a_voiceType)
+	{
+		if (!a_voiceType) {
+			return "";
+		}
+		return std::format("{}|{}", a_id, a_voiceType->GetFormEditorID());
+	}
+
+	std::string TopicInfo::GenerateHash(RE::FormID a_id)
+	{
+		return std::format("{}|all", a_id);
+	}
+
+	std::vector<std::string> TopicInfo::GetHashes() const
+	{
+		if (_voiceTypes.empty()) {
+			return std::vector<std::string>{ GenerateHash(_topicInfoId) };
+		}
+		return _voiceTypes | std::ranges::views::transform([this](RE::BGSVoiceType* a_voiceType) {
+			return GenerateHash(_topicInfoId, a_voiceType);
+		}) | std::ranges::to<std::vector>();
+	}
+
+	std::string TopicInfo::GetVoiceFilePath(RE::TESTopic* a_topic, RE::TESTopicInfo* a_topicInfo, RE::BGSVoiceType* a_voiceType, int a_num) const
+	{
+		const auto path{ _responses[a_num - 1].filePath };
+		if (path[0] != '$')
+			return path;
+		auto sections = Util::StringSplitToOwned(path, "\\"sv);
+		for (auto& section : sections) {
+			if (section == "[VOICE_TYPE]") {
+				section = a_voiceType->GetFormEditorID();
+			} else if (section == "[TOPIC_MOD_FILE]") {
+				section = a_topic->GetFile()->GetFilename();
+			} else if (section == "[TOPIC_INFO_MOD_FILE]") {
+				section = a_topicInfo->GetFile()->GetFilename();
+			} else if (section == "[VOICE_MOD_FILE]") {
+				section = a_voiceType->GetDescriptionOwnerFile()->GetFilename();
+			}
+		}
+		return Util::StringJoin(sections, "\\"sv);
+	}
+
+}	 // namespace DDR

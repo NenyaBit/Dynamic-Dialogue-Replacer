@@ -9,8 +9,8 @@ namespace DDR
 	struct Response
 	{
 		bool keep;
-		std::string sub;
-		std::string path;
+		std::string subtitle;
+		std::string filePath;
 	};
 
 	class TopicInfo
@@ -19,56 +19,20 @@ namespace DDR
 		TopicInfo(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
 		~TopicInfo() = default;
 
-		static inline std::string GenerateHash(RE::FormID a_topicInfoId, RE::BGSVoiceType* a_voiceType)
-		{
-			if (!a_voiceType)
-				return "";
+		_NODISCARD static std::string GenerateHash(RE::FormID a_id, const RE::BGSVoiceType* a_voiceType);
+		_NODISCARD static std::string GenerateHash(RE::FormID a_id);
+		_NODISCARD std::vector<std::string> GetHashes() const;
 
-			return std::format("{}|{}", a_topicInfoId, a_voiceType->GetFormEditorID());
-		}
-		static inline std::string GenerateHash(RE::FormID a_topicInfoId)
-		{
-			return std::format("{}|all", a_topicInfoId);
-		}
-		inline std::vector<std::string> GetHashes() const
-		{
-			return _voiceTypes.empty() ? std::vector<std::string>{ GenerateHash(_topicInfoId) } :
-																	 _voiceTypes | std::ranges::views::transform([this](RE::BGSVoiceType* a_voiceType) {
-																		 return GenerateHash(_topicInfoId, a_voiceType);
-																	 }) | std::ranges::to<std::vector>();
-		}
+		_NODISCARD inline bool HasReplacement(int a_num) const { return a_num <= _responses.size() && !_responses[a_num - 1].keep; }
+		_NODISCARD inline bool HasReplacementSubtitle(int a_num) const { return HasReplacement(a_num) && !_responses[a_num - 1].subtitle.empty(); }
+		_NODISCARD inline bool HasReplacementVoiceFile(int a_num) const { return HasReplacement(a_num) && !_responses[a_num - 1].filePath.empty(); }
 
-		inline bool HasReplacement(int a_num) { return a_num <= _responses.size() && !_responses[a_num - 1].keep; }
-		inline bool HasReplacementSub(int a_num) { return HasReplacement(a_num) && !_responses[a_num - 1].sub.empty(); }
-		inline bool HasReplacementPath(int a_num) { return HasReplacement(a_num) && !_responses[a_num - 1].path.empty(); }
-
-		inline std::string GetSubtitle(int a_num) { return _responses[a_num - 1].sub; }
-		inline std::string GetPath(RE::TESTopic* a_topic, RE::TESTopicInfo* a_topicInfo, RE::BGSVoiceType* a_voiceType, int a_num)
-		{
-			const auto path{ _responses[a_num - 1].path };
-
-			if (path[0] != '$')
-				return path;
-
-			auto sections = Util::StringSplitToOwned(path, "\\"sv);
-			for (auto& section : sections) {
-				if (section == "[VOICE_TYPE]") {
-					section = a_voiceType->GetFormEditorID();
-				} else if (section == "[TOPIC_MOD_FILE]") {
-					section = a_topic->GetFile()->GetFilename();
-				} else if (section == "[TOPIC_INFO_MOD_FILE]") {
-					section = a_topicInfo->GetFile()->GetFilename();
-				} else if (section == "[VOICE_MOD_FILE]") {
-					section = a_voiceType->GetDescriptionOwnerFile()->GetFilename();
-				}
-			}
-
-			return Util::StringJoin(sections, "\\"sv);
-		}
-		inline bool IsRand() { return _random; }
-		inline uint64_t GetPriority() { return _priority; }
-		inline bool ShouldCut(int a_num) { return _cut && a_num >= _responses.size(); }
-		inline bool ConditionsMet(RE::TESObjectREFR* a_subject, RE::TESObjectREFR* a_target) { return _conditions.ConditionsMet(a_subject, a_target); }
+		_NODISCARD std::string GetVoiceFilePath(RE::TESTopic* a_topic, RE::TESTopicInfo* a_topicInfo, RE::BGSVoiceType* a_voiceType, int a_num) const;
+		_NODISCARD inline std::string GetSubtitle(int a_num) const { return _responses[a_num - 1].subtitle; }
+		_NODISCARD inline bool IsRandom() const { return _random; }
+		_NODISCARD inline uint64_t GetPriority() const { return _priority; }
+		_NODISCARD inline bool ShouldCut(int a_num) const { return _cut && a_num >= _responses.size(); }
+		_NODISCARD inline bool ConditionsMet(RE::TESObjectREFR* a_subject, RE::TESObjectREFR* a_target) const { return _conditions.ConditionsMet(a_subject, a_target); }
 
 	private:
 		RE::FormID _topicInfoId;
@@ -88,8 +52,11 @@ namespace YAML
 	{
 		static bool decode(const Node& node, DDR::Response& rhs)
 		{
-			rhs.sub = node["sub"].as<std::string>("");
-			rhs.path = node["path"].as<std::string>("");
+			rhs.subtitle = node["subtitle"].as<std::string>("");
+			if (rhs.subtitle.empty()) {
+				rhs.subtitle = node["sub"].as<std::string>("");
+			}
+			rhs.filePath = node["path"].as<std::string>("");
 			rhs.keep = node["keep"].as<std::string>("") == "true" || node["keep"].as<bool>(false);
 			return true;
 		}

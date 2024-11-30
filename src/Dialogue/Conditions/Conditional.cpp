@@ -5,7 +5,7 @@
 
 namespace Conditions
 {
-	bool Conditional::ConditionsMet(RE::TESObjectREFR* a_subject, RE::TESObjectREFR* a_target)
+	bool Conditional::ConditionsMet(RE::TESObjectREFR* a_subject, RE::TESObjectREFR* a_target) const
 	{
 		if (!_conditions) {
 			return true;

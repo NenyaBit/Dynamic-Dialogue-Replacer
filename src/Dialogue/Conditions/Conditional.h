@@ -14,9 +14,10 @@ namespace Conditions
 				throw std::runtime_error("Failed to parse conditions");
 			}
 		}
+		~Conditional() = default;
 
 	public:
-		_NODISCARD bool ConditionsMet(RE::TESObjectREFR* a_subject, RE::TESObjectREFR* a_target);
+		_NODISCARD bool ConditionsMet(RE::TESObjectREFR* a_subject, RE::TESObjectREFR* a_target) const;
 
 		operator bool() const { return _conditions != nullptr; }
 

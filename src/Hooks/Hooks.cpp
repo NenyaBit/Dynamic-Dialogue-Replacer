@@ -45,46 +45,46 @@ namespace DDR
 		if (_responseNumber == 1) {
 			_response = DialogueManager::FindReplacementResponse(a_4, a_3, a_5);
 		}
-
 		if (_response && _response->ShouldCut(_responseNumber)) {
 			delete a_5->next;
 			a_5->next = nullptr;
 		}
-
 		return _PopulateTopicInfo(a_1, a_2, a_3, a_4, a_5);
 	}
 
 	char* Hooks::SetSubtitle(RE::DialogueResponse* a_response, char* a_text, int32_t a_3)
 	{
-		std::string text{ (_response && _response->HasReplacementSub(_responseNumber)) ? _response->GetSubtitle(_responseNumber) : a_text };
-
-		//logger::info("SetSubtitle - {} - {}", a_text, text);
-
+		std::string text;
+		if (_response && _response->HasReplacementSubtitle(_responseNumber)) {
+			const auto replace = _response->GetSubtitle(_responseNumber);
+			logger::info("replacing subtitle {} with {}", a_text, replace);
+			text = replace;
+		} else {
+			text = a_text;
+		}
 		return _SetSubtitle(a_response, text.data(), a_3);
 	}
 
 	bool Hooks::ConstructResponse(RE::TESTopicInfo::ResponseData* a_response, char* a_filePath, RE::BGSVoiceType* a_voiceType, RE::TESTopic* a_topic, RE::TESTopicInfo* a_topicInfo)
 	{
-		if (_ConstructResponse(a_response, a_filePath, a_voiceType, a_topic, a_topicInfo)) {
-			std::string filePath{ a_filePath };
-
-			if (_response && _response->HasReplacementPath(_responseNumber)) {
-				//logger::info("replacing with {}", _response->GetPath(a_topic, a_topicInfo, a_voiceType, a_response->responseNumber));
-				*a_filePath = NULL;
-				strcat_s(a_filePath, 0x104ui64, _response->GetPath(a_topic, a_topicInfo, a_voiceType, a_response->responseNumber).c_str());
-			}
-
-			return true;
+		if (!_ConstructResponse(a_response, a_filePath, a_voiceType, a_topic, a_topicInfo)) {
+			return false;
 		}
-
-		return false;
+		if (_response && _response->HasReplacementVoiceFile(_responseNumber)) {
+			std::string filePath{ a_filePath };
+			const auto path = _response->GetVoiceFilePath(a_topic, a_topicInfo, a_voiceType, a_response->responseNumber);
+			logger::info("replacing voice file {} with {}", filePath, path);
+			*a_filePath = NULL;
+			strcat_s(a_filePath, 0x104ui64, path.c_str());
+		}
+		return true;
 	}
 
 	int64_t Hooks::AddTopic(RE::MenuTopicManager* a_this, RE::TESTopic* a_topic, int64_t a_3, int64_t a_4)
 	{
-		if (!a_topic)
+		if (!a_topic) {
 			return _AddTopic(a_this, a_topic, a_3, a_4);
-
+		}
 		const auto target = a_this->speaker.get().get();
 		if (const auto& resp = DialogueManager::FindReplacementTopic(a_topic->GetFormID(), target, true)) {
 			bool flag = true;
@@ -98,32 +98,26 @@ namespace DDR
 							break;
 						}
 					}
-
 					currInfo++;
 				}
 			}
-
 			if (flag) {
 				// hide topic
 				if (resp->IsHidden())
 					return 0;
-
 				// replace topic
 				const auto& repl = resp->GetTopic();
 				const auto& res = repl ? _AddTopic(a_this, repl, a_3, a_4) : 0;
-
 				// inject additional topics
 				const auto& injections = resp->GetInjections();
 				for (const auto& injectTopic : injections) {
 					_AddTopic(a_this, injectTopic, a_3, a_4);
 				}
-
 				if (res || !resp->ShouldProceed()) {
 					return res;
 				}
 			}
 		}
-
 		return _AddTopic(a_this, a_topic, a_3, a_4);
 	}
 

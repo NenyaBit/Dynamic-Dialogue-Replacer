@@ -16,11 +16,9 @@ namespace DDR
 
 		static std::string AddReplacementTopic(RE::FormID a_topicId, std::string a_text);
 		static void RemoveReplacementTopic(RE::FormID a_topicId, std::string a_key);
+
 	private:
-		static inline std::vector<std::shared_ptr<TopicInfo>> _responses;
-		static inline std::unordered_map<std::string, std::vector<std::shared_ptr<TopicInfo>>> _respReplacements;
-		
-		static inline std::vector<std::shared_ptr<Topic>> _topics;
+		static inline std::map<std::string, std::vector<std::shared_ptr<TopicInfo>>> _responseReplacements;
 		static inline std::unordered_map<RE::FormID, std::vector<std::shared_ptr<Topic>>> _topicReplacements;
 
 		static inline std::unordered_map<RE::FormID, std::string> _tempTopicKeys;
