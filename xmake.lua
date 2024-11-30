@@ -18,7 +18,7 @@ option_end()
 
 -- Dependencies & Includes
 -- https://github.com/xmake-io/xmake-repo/tree/dev
-add_requires("yaml-cpp")
+add_requires("yaml-cpp", "lua", "sol2", "frozen")
 
 includes("lib/commonlibsse-ng")
 
@@ -55,7 +55,7 @@ set_config("skyrim_vr", true)
 -- Target
 target(PROJECT_NAME)
     -- Dependencies
-    add_packages("yaml-cpp")
+    add_packages("yaml-cpp", "lua", "sol2", "frozen")
     add_deps("detours")
     add_includedirs("lib/detours/src")
 
