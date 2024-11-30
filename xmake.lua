@@ -87,7 +87,10 @@ target(PROJECT_NAME)
         "cl::/utf-8"
     )
     -- flags (cl: warnings -> errors)
-    add_cxxflags("cl::/we4715") -- `function` : not all control paths return a value
+    add_cxxflags(
+        "cl::/we4715", -- `function` : not all control paths return a value
+        "cl::/we4189" -- `variable` : local variable is initialized but not referenced
+    )
     -- flags (cl: disable warnings)
     add_cxxflags(
         "cl::/wd4068", -- unknown pragma 'clang'
