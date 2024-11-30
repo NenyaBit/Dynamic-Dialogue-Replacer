@@ -7,6 +7,8 @@ namespace DDR
 {
 	class DialogueManager
 	{
+		constexpr static std::string_view DIRECTORY_PATH = "Data\\SKSE\\DynamicDialogueReplacer";
+
 	public:
 		static void Init();
 		static std::shared_ptr<TopicInfo> FindReplacementResponse(RE::Character* a_speaker, RE::TESTopicInfo* a_topicInfo, RE::TESTopicInfo::ResponseData* a_responseData);
@@ -24,7 +26,5 @@ namespace DDR
 		static inline std::unordered_map<RE::FormID, std::string> _tempTopicKeys;
 		static inline std::unordered_map<RE::FormID, std::shared_ptr<Topic>> _tempTopicReplacements;
 		static inline std::mutex _tempTopicMutex;
-		
-		static inline bool _init = false;
 	};
 }

@@ -110,12 +110,10 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	return conditionItem;
 }
 
-auto ConditionParser::ParseParam(const std::string& a_text, RE::SCRIPT_PARAM_TYPE a_type, const RefMap& a_refs) -> ConditionParam
+ConditionParser::ConditionParam ConditionParser::ParseParam(const std::string& a_text, RE::SCRIPT_PARAM_TYPE a_type, const RefMap& a_refs)
 {
 	ConditionParam param{};
-
 	auto textCIS = Util::CastUpper(a_text);
-
 	switch (a_type) {
 	case RE::SCRIPT_PARAM_TYPE::kChar:
 	case RE::SCRIPT_PARAM_TYPE::kInt:
@@ -138,16 +136,12 @@ auto ConditionParser::ParseParam(const std::string& a_text, RE::SCRIPT_PARAM_TYP
 	case RE::SCRIPT_PARAM_TYPE::kCastingSource:
 		param.i = std::to_underlying(EnumLookup::LookupCastingSource(textCIS));
 		break;
-
 	case RE::SCRIPT_PARAM_TYPE::kVMScriptVar:
-		{
-			param.str = new RE::BSString(a_text.c_str());
-			break;
-		}
+		param.str = new RE::BSString(a_text.c_str());
+		break;
 	default:
 		param.form = LookupForm(textCIS, a_refs);
 		break;
 	}
-
 	return param;
 }

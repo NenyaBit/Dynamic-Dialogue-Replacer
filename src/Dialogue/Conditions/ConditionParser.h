@@ -19,12 +19,9 @@ namespace Conditions
 			auto condition = std::make_shared<RE::TESCondition>();
 			RE::TESConditionItem** head = std::addressof(condition->head);
 			int numConditions = 0;
-
 			for (auto& text : a_rawConditions) {
 				if (text.empty())
 					continue;
-
-
 				if (auto conditionItem = ConditionParser::Parse(text, a_refs)) {
 					*head = conditionItem;
 					head = std::addressof(conditionItem->next);
@@ -34,7 +31,6 @@ namespace Conditions
 					return nullptr;
 				}
 			}
-
 			return numConditions ? condition : nullptr;
 		}
 
@@ -42,15 +38,14 @@ namespace Conditions
 		{
 			ConditionParser::RefMap refMap;
 			refMap["PLAYER"] = RE::PlayerCharacter::GetSingleton();
-
 			for (const auto& [key, value] : a_rawRefs) {
 				if (const auto form = Util::FormFromString<RE::TESForm>(value)) {
 					refMap[key] = form;
 				}
 			}
-
 			return refMap;
 		}
+
 	private:
 		union ConditionParam
 		{
@@ -61,7 +56,7 @@ namespace Conditions
 			RE::BSString* str;
 		};
 
-		static auto ParseParam(const std::string& a_text, RE::SCRIPT_PARAM_TYPE a_type, const RefMap& a_refs) -> ConditionParam;
+		static ConditionParam ParseParam(const std::string& a_text, RE::SCRIPT_PARAM_TYPE a_type, const RefMap& a_refs);
 
 		template <typename T = RE::TESForm>
 		static auto LookupForm(const std::string& a_text, const RefMap& a_refs) -> T*

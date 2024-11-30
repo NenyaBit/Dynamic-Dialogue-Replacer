@@ -1,4 +1,4 @@
-#include "DialogueManager.h"
+#include "Dialogue/DialogueManager.h"
 #include "Hooks/Hooks.h"
 #include "Papyrus.h"
 

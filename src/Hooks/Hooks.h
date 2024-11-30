@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DialogueManager.h"
+#include "Dialogue/DialogueManager.h"
 #include <unordered_set>
 
 namespace RE
