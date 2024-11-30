@@ -145,7 +145,7 @@ namespace DDR
 			for (auto it = dialogue->begin(); it != dialogue->end(); it++) {
 				if (auto curr = *it) {
 					const auto id = curr->parentTopic->GetFormID();
-					std::shared_ptr<Topic> replacement = nullptr;
+					std::shared_ptr<Topic> replacement;
 					const auto iter = _cache.find(id);
 					if (iter != _cache.end()) {	 // find in cache first
 						replacement = iter->second;
@@ -153,12 +153,8 @@ namespace DDR
 						replacement = DialogueManager::FindReplacementTopic(id, _currentTarget, false);
 						_cache[id] = replacement;
 					}
-					std::string text;
-					if (replacement) {
-						text = replacement->GetText();
-					} else {
-						text = curr->topicText;
-					}
+					const auto replacedText = replacement ? replacement->GetText() : "";
+					std::string text = replacedText ? replacedText : curr->topicText;
 					DialogueManager::ApplyTextReplacements(text, _currentTarget, ReplacemenType::Topic);
 					curr->topicText = _strdup(text.c_str());
 				}
