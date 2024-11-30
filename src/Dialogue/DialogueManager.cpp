@@ -9,7 +9,7 @@ namespace DDR
 		logger::info("Initializing replacements");
 		std::error_code ec{};
 		if (!fs::exists(DIRECTORY_PATH, ec) || fs::is_empty(DIRECTORY_PATH, ec)) {
-			logger::error("Error loading replacements in {}: {}", DIRECTORY_PATH, ec.message());
+			logger::error("Error loading replacements in {}. Folder is empty or does not exist - {}", DIRECTORY_PATH, ec.message());
 			return;
 		}
 		for (const auto& entry : fs::directory_iterator(DIRECTORY_PATH)) {
@@ -24,35 +24,10 @@ namespace DDR
 				const auto file = YAML::LoadFile(fileName);
 				const auto refs = file["refs"].as<std::unordered_map<std::string, std::string>>(std::unordered_map<std::string, std::string>{});
 				const auto refMap = Conditions::ConditionParser::GenerateRefMap(refs);
-				for (const auto&& it : file["topicInfos"]) {
-					try {
-						const auto repl = std::make_shared<TopicInfo>(it, refMap);
-						for (const auto& hash : repl->GetHashes()) {
-							_responseReplacements[hash].emplace_back(repl);
-						}
-					} catch (std::exception& e) {
-						logger::info("Failed to load response replaccement - {}", e.what());
-					}
-				}
-				for (const auto&& it : file["topics"]) {
-					try {
-						const auto repl = std::make_shared<Topic>(it, refMap);
-						_topicReplacements[repl->GetId()].emplace_back(repl);
-					} catch (std::exception& e) {
-						logger::info("Failed to load topic replacement - {}", e.what());
-					}
-				}
-				for (const auto&& it : file["scripts"]) {
-					try {
-						TextReplacement repl{ it };
-						if (!_lua.InitializeEnvironment(repl)) {
-							logger::info("Failed to initialize environment for script {}", repl.GetScript());
-						}
-					} catch (std::exception& e) {
-						logger::info("Failed to load script - {}", e.what());
-					}
-				}
-				logger::info("Loaded {} response replacements and {} topic replacements from {}", _responseReplacements.size(), _topicReplacements.size(), fileName);
+				size_t responses = ParseResponses(file, refMap);
+				size_t topics = ParseTopics(file, refMap);
+				size_t scripts = ParseScripts(file);
+				logger::info("Loaded {} response replacements, {} topic replacements and {} scripts from {}", responses, topics, scripts, fileName);
 			} catch (std::exception& e) {
 				logger::info("Failed to load {} - {}", fileName, e.what());
 			}
@@ -68,6 +43,69 @@ namespace DDR
 			});
 		}
 	}
+	
+	size_t DialogueManager::ParseResponses(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs)
+	{
+		const auto node = a_node["topicInfos"];
+		if (!node.IsDefined() || !node.IsSequence()) {
+			return 0;
+		}
+		size_t responses = 0;
+		for (const auto&& it : node) {
+			try {
+				const auto repl = std::make_shared<TopicInfo>(it, a_refs);
+				for (const auto& hash : repl->GetHashes()) {
+					_responseReplacements[hash].emplace_back(repl);
+				}
+				responses++;
+			} catch (std::exception& e) {
+				logger::info("Failed to load response replaccement - {}", e.what());
+			}
+		}
+		return responses;
+	}
+
+	size_t DialogueManager::ParseTopics(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs)
+	{
+		const auto node = a_node["topics"];
+		if (!node.IsDefined() || !node.IsSequence()) {
+			return 0;
+		}
+		size_t topics = 0;
+		for (const auto&& it : node) {
+			try {
+				const auto repl = std::make_shared<Topic>(it, a_refs);
+				_topicReplacements[repl->GetId()].emplace_back(repl);
+				topics++;
+			} catch (std::exception& e) {
+				logger::info("Failed to load topic replacement - {}", e.what());
+			}
+		}
+		return topics;
+	}
+
+	size_t DialogueManager::ParseScripts(const YAML::Node& a_node)
+	{
+		const auto node = a_node["scripts"];
+		if (!node.IsDefined() || !node.IsSequence()) {
+			return 0;
+		}
+		size_t scripts = 0;
+		for (const auto&& it : node) {
+			try {
+				TextReplacement repl{ it };
+				if (!_lua.InitializeEnvironment(repl)) {
+					logger::info("Failed to initialize environment for script {}", repl.GetScript());
+				} else {
+					scripts++;
+				}
+			} catch (std::exception& e) {
+				logger::info("Failed to load script - {}", e.what());
+			}
+		}
+		return scripts;
+	}
+
 
 	RE::TESObjectREFR* DialogueManager::GetDialogueTarget(RE::Actor* a_speaker)
 	{
