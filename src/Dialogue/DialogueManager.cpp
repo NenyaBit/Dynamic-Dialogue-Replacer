@@ -156,23 +156,26 @@ namespace DDR
 		return nullptr;
 	}
 
-	std::shared_ptr<Topic> DialogueManager::FindReplacementTopic(RE::FormID a_id, RE::TESObjectREFR* a_target, bool a_preprocessing)
+	std::vector<std::shared_ptr<Topic>> DialogueManager::FindReplacementTopic(RE::FormID a_id, RE::TESObjectREFR* a_target, bool a_preprocessing)
 	{
+		std::vector<std::shared_ptr<Topic>> ret{};
 		if (_tempTopicMutex.try_lock()) {
-			if (_tempTopicReplacements.count(a_id)) {
-				return _tempTopicReplacements[a_id];
+			if (_tempTopicKeys.contains(a_id)) {
+				ret.push_back(_tempTopicReplacements[a_id]);
 			}
 			_tempTopicMutex.unlock();
 		}
-		if (_topicReplacements.count(a_id)) {
+		if (_topicReplacements.contains(a_id)) {
 			const auto& replacements = _topicReplacements[a_id];
 			for (const auto& repl : replacements) {
-				if (repl->HasPreProcessingAction() == a_preprocessing && repl->ConditionsMet(RE::PlayerCharacter::GetSingleton(), a_target)) {
-					return repl;
+				if (a_preprocessing && !repl->HasPreProcessingAction())
+					continue;
+				if (repl->ConditionsMet(RE::PlayerCharacter::GetSingleton(), a_target)) {
+					ret.push_back(repl);
 				}
 			}
 		}
-		return nullptr;
+		return ret;
 	}
 
 	std::string DialogueManager::AddReplacementTopic(RE::FormID a_topicId, std::string a_text)
@@ -208,15 +211,20 @@ namespace DDR
 		const auto target = actor ? GetDialogueTarget(actor) : nullptr;
 		_lua.ForEachScript([&](const TextReplacement& a_replacement, const sol::environment& a_env) {
 			if (a_replacement.CanApplyReplacement(a_speaker, target, a_type)) {
-				sol::protected_function_result result = a_env["replace"](a_text);
-				if (!result.valid()) {
-					sol::error err = result;
-					logger::error("Failed to apply replacement - {}", err.what());
-				} else if (result.get_type() != sol::type::string) {
-					const auto type = magic_enum::enum_name(result.get_type());
-					logger::error("Failed to apply replacement - expected string, got {}", type);
-				} else {
-					a_text = result;
+				try {
+					std::unique_lock lock{ _luaMutex };
+					sol::protected_function_result result = a_env["replace"](a_text);
+					if (!result.valid()) {
+						sol::error err = result;
+						logger::error("Failed to apply replacement - {}", err.what());
+					} else if (result.get_type() != sol::type::string) {
+						const auto type = magic_enum::enum_name(result.get_type());
+						logger::error("Failed to apply replacement - expected string, got {}", type);
+					} else {
+						a_text = result;
+					}
+				} catch (const std::exception& e) {
+					logger::error("Failed to apply replacement - {}", e.what());
 				}
 			}
 		});

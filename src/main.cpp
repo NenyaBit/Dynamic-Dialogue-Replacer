@@ -5,7 +5,7 @@
 void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) noexcept
 {
 	if (message->type == SKSE::MessagingInterface::kDataLoaded) {
-		DialogueManager::Init();
+		DialogueManager::GetSingleton()->Init();
 	}
 }
 

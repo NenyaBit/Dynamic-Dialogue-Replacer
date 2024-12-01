@@ -43,7 +43,7 @@ namespace DDR
 	{
 		_response.responseNumber = a_5->responseNumber;
 		if (_response.responseNumber == 1) {
-			_response.response = DialogueManager::FindReplacementResponse(a_speaker, a_3, a_5);
+			_response.response = DialogueManager::GetSingleton()->FindReplacementResponse(a_speaker, a_3, a_5);
 			_response.speaker = a_speaker;
 		}
 		if (_response.response && _response.response->ShouldCut(_response.responseNumber)) {
@@ -63,7 +63,7 @@ namespace DDR
 		} else {
 			text = a_text;
 		}
-		DialogueManager::ApplyTextReplacements(text, _response.speaker, ReplacemenType::Response);
+		DialogueManager::GetSingleton()->ApplyTextReplacements(text, _response.speaker, ReplacemenType::Response);
 		return _SetSubtitle(a_response, text.data(), a_3);
 	}
 
@@ -82,83 +82,100 @@ namespace DDR
 		return true;
 	}
 
-	int64_t Hooks::AddTopic(RE::MenuTopicManager* a_this, RE::TESTopic* a_topic, int64_t a_3, int64_t a_4)
+	int64_t Hooks::AddTopic(RE::MenuTopicManager* a_this, RE::TESTopic* a_topic, RE::TESTopic* a_activeTopic, uint64_t a_4)
 	{
-		if (!a_topic) {
-			return _AddTopic(a_this, a_topic, a_3, a_4);
+		if (!a_activeTopic) {
+			return _AddTopic(a_this, a_topic, a_activeTopic, a_4);
 		}
 		const auto target = a_this->speaker.get().get();
-		const auto& resp = DialogueManager::FindReplacementTopic(a_topic->GetFormID(), target, true);
-		if (!resp) {
-			return _AddTopic(a_this, a_topic, a_3, a_4);
+		auto topics = DialogueManager::GetSingleton()->FindReplacementTopic(a_activeTopic->GetFormID(), target, true);
+		if (topics.empty()) {
+			return _AddTopic(a_this, a_topic, a_activeTopic, a_4);
 		}
-		if (resp->VerifyExistingConditions()) {
-			bool hasValidResponse = false;
-			auto currInfo = a_topic->topicInfos;
-			for (auto i = a_topic->numTopicInfos; i > 0; i--) {
-				if (currInfo && *currInfo) {
-					if ((*currInfo)->objConditions.IsTrue(target, RE::PlayerCharacter::GetSingleton())) {
-						hasValidResponse = true;
-						break;
-					}
+		bool hasValidResponse = false;
+		auto currInfo = a_activeTopic->topicInfos;
+		for (auto i = a_activeTopic->numTopicInfos; i > 0; i--) {
+			if (currInfo && *currInfo) {
+				if ((*currInfo)->objConditions.IsTrue(target, RE::PlayerCharacter::GetSingleton())) {
+					hasValidResponse = true;
+					break;
 				}
-				currInfo++;
 			}
-			if (!hasValidResponse) {
-				return _AddTopic(a_this, a_topic, a_3, a_4);
+			currInfo++;
+		}
+		bool firstPass = !a_this->dialogueList || a_this->dialogueList->empty();
+		for (auto&& it : topics) {
+			if (!hasValidResponse && it->VerifyExistingConditions()) {
+				continue;
+			}
+			if (firstPass) {
+				// Inject additional topics
+				for (const auto& injectTopic : it->GetInjections()) {
+					_AddTopic(a_this, injectTopic, a_activeTopic, a_4);
+				}
+			}
+			if (it->AffectsInfoTopic(a_topic)) {
+				// Hide topic, consumes the topic
+				if (it->IsHidden()) {
+					return 0;
+				}
+				// Replace active sub-topic
+				if (const auto replace = it->GetReplacingTopic()) {
+					a_topic = replace;
+				}
+			}
+			if (!it->ShouldProceed()) {
+				break;
 			}
 		}
-		// hide topic
-		if (resp->IsHidden()) {
-			return 0;
-		}
-		// replace topic
-		const auto& repl = resp->GetReplacingTopic();
-		const auto& res = repl ? _AddTopic(a_this, repl, a_3, a_4) : 0;
-		// inject additional topics
-		const auto& injections = resp->GetInjections();
-		for (const auto& injectTopic : injections) {
-			_AddTopic(a_this, injectTopic, a_3, a_4);
-		}
-		if (res || !resp->ShouldProceed()) {
-			return res;
-		} else {
-			return _AddTopic(a_this, a_topic, a_3, a_4);
-		}
+		return _AddTopic(a_this, a_topic, a_activeTopic, a_4);
 	}
 
 	RE::UI_MESSAGE_RESULTS DialogueMenuEx::ProcessMessageEx(RE::UIMessage& a_message)
 	{
 		const auto menu = RE::MenuTopicManager::GetSingleton();
-		// find dialogue target on start
-		if (a_message.type == RE::UI_MESSAGE_TYPE::kShow || a_message.type == RE::UI_MESSAGE_TYPE::kUpdate) {
+		const auto manager = DialogueManager::GetSingleton();
+		switch (*a_message.type) {
+		case RE::UI_MESSAGE_TYPE::kShow:
 			_currentTarget = menu->speaker.get().get();
-			_currId = -1;
-		}
-		const auto rootId = menu->rootTopicInfo ? menu->rootTopicInfo->GetFormID() : 0;
-		if (_currId == -1 || _currId != rootId) {
-			_cache.clear();
-			_currId = rootId;
-		}
-		if (const auto dialogue = menu->dialogueList) {
+			__fallthrough;
+		case RE::UI_MESSAGE_TYPE::kUpdate:
+			if (const auto dialogue = menu->dialogueList) {
 #pragma warning(suppress : 4834)
-			for (auto it = dialogue->begin(); it != dialogue->end(); it++) {
-				if (auto curr = *it) {
-					const auto id = curr->parentTopic->GetFormID();
-					std::shared_ptr<Topic> replacement;
-					const auto iter = _cache.find(id);
-					if (iter != _cache.end()) {	 // find in cache first
-						replacement = iter->second;
-					} else {	// evaluate and place
-						replacement = DialogueManager::FindReplacementTopic(id, _currentTarget, false);
-						_cache[id] = replacement;
+				for (auto it = dialogue->begin(); it != dialogue->end(); it++) {
+					if (auto curr = *it) {
+						const auto id = curr->parentTopic->GetFormID();
+						std::shared_ptr<Topic> replacement;
+						const auto iter = _cache.find(id);
+						if (iter != _cache.end()) {	 // find in cache first
+							replacement = iter->second;
+						} else {	// evaluate and place
+							const auto topics = manager->FindReplacementTopic(id, _currentTarget, false);
+							for (auto&& topic : topics) {
+								if (!topic->GetText().empty()) {
+									replacement = topic;
+									_cache[id] = replacement;
+									break;
+								}
+							}
+							if (!replacement && !topics.empty()) {
+								replacement = topics[0];
+								_cache[id] = replacement;
+							}
+						}
+						std::string text = replacement ? replacement->GetText() : "";
+						if (text.empty()) {
+							text = curr->topicText;
+						}
+						manager->ApplyTextReplacements(text, _currentTarget, ReplacemenType::Topic);
+						curr->topicText = text;
 					}
-					const auto replacedText = replacement ? replacement->GetText() : "";
-					std::string text = replacedText ? replacedText : curr->topicText;
-					DialogueManager::ApplyTextReplacements(text, _currentTarget, ReplacemenType::Topic);
-					curr->topicText = _strdup(text.c_str());
 				}
 			}
+			break;
+		case RE::UI_MESSAGE_TYPE::kHide:
+			_cache.clear();
+			break;
 		}
 		return _ProcessMessageFn(this, a_message);
 	}

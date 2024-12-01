@@ -4,6 +4,7 @@
 #include <lua.hpp>
 #include <sol/sol.hpp>
 
+#include "Util/Singleton.h"
 #include "TextReplacement.h"
 #include "Topic.h"
 #include "TopicInfo.h"
@@ -26,32 +27,34 @@ namespace DDR
 		std::vector<std::pair<TextReplacement, sol::environment>> scripts{};
 	};
 
-	class DialogueManager
+	class DialogueManager : 
+		public Singleton<DialogueManager>
 	{
 	public:
 		static RE::TESObjectREFR* GetDialogueTarget(RE::Actor* a_speaker);
 
 	public:
-		static void Init();
-		static std::shared_ptr<TopicInfo> FindReplacementResponse(RE::Character* a_speaker, RE::TESTopicInfo* a_topicInfo, RE::TESTopicInfo::ResponseData* a_responseData);
-		static std::shared_ptr<Topic> FindReplacementTopic(RE::FormID a_id, RE::TESObjectREFR* a_target, bool a_preprocessing);
+		void Init();
+		std::shared_ptr<TopicInfo> FindReplacementResponse(RE::Character* a_speaker, RE::TESTopicInfo* a_topicInfo, RE::TESTopicInfo::ResponseData* a_responseData);
+		std::vector<std::shared_ptr<Topic>> FindReplacementTopic(RE::FormID a_id, RE::TESObjectREFR* a_target, bool a_preprocessing);
 
-		static std::string AddReplacementTopic(RE::FormID a_topicId, std::string a_text);
-		static void RemoveReplacementTopic(RE::FormID a_topicId, std::string a_key);
-		static void ApplyTextReplacements(std::string& a_text, RE::TESObjectREFR* a_speaker, ReplacemenType a_type);
-
-	private:
-		static size_t ParseResponses(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
-		static size_t ParseTopics(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
-		static size_t ParseScripts(const YAML::Node& a_node);
+		std::string AddReplacementTopic(RE::FormID a_topicId, std::string a_text);
+		void RemoveReplacementTopic(RE::FormID a_topicId, std::string a_key);
+		void ApplyTextReplacements(std::string& a_text, RE::TESObjectREFR* a_speaker, ReplacemenType a_type);
 
 	private:
-		static inline LuaData _lua{};
-		static inline std::map<std::string, std::vector<std::shared_ptr<TopicInfo>>> _responseReplacements;
-		static inline std::unordered_map<RE::FormID, std::vector<std::shared_ptr<Topic>>> _topicReplacements;
+		size_t ParseResponses(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
+		size_t ParseTopics(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
+		size_t ParseScripts(const YAML::Node& a_node);
 
-		static inline std::unordered_map<RE::FormID, std::string> _tempTopicKeys;
-		static inline std::unordered_map<RE::FormID, std::shared_ptr<Topic>> _tempTopicReplacements;
-		static inline std::mutex _tempTopicMutex;
+	private:
+		LuaData _lua{};
+		std::mutex _luaMutex{};
+		std::map<std::string, std::vector<std::shared_ptr<TopicInfo>>> _responseReplacements;
+		std::unordered_map<RE::FormID, std::vector<std::shared_ptr<Topic>>> _topicReplacements;
+
+		std::unordered_map<RE::FormID, std::string> _tempTopicKeys;
+		std::unordered_map<RE::FormID, std::shared_ptr<Topic>> _tempTopicReplacements;
+		std::mutex _tempTopicMutex{};
 	};
 }	 // namespace DDR

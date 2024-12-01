@@ -8,8 +8,8 @@ namespace
 {
 	constexpr std::string_view PapyrusClass = "DynamicDialogueReplacer";
 
-	std::string AddReplacementTopic(RE::StaticFunctionTag*, RE::FormID a_topicId, std::string a_text) { return DialogueManager::AddReplacementTopic(a_topicId, a_text); }
-	void RemoveReplacementTopic(RE::StaticFunctionTag*, RE::FormID a_topicId, std::string a_key) { return DialogueManager::RemoveReplacementTopic(a_topicId, a_key); }
+	std::string AddReplacementTopic(RE::StaticFunctionTag*, RE::FormID a_topicId, std::string a_text) { return DialogueManager::GetSingleton()->AddReplacementTopic(a_topicId, a_text); }
+	void RemoveReplacementTopic(RE::StaticFunctionTag*, RE::FormID a_topicId, std::string a_key) { return DialogueManager::GetSingleton()->RemoveReplacementTopic(a_topicId, a_key); }
 }
 
 namespace DDR::Papyrus

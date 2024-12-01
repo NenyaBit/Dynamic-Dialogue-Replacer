@@ -13,17 +13,19 @@ namespace DDR
 		~Topic() = default;
 
 		/// @brief FormID of the affected topic
-		_NODISCARD RE::FormID GetId() { return _id; }
+		_NODISCARD RE::FormID GetId() { return _affectedTopic; }
+		/// @brief Check if the topic is affected by the replacement
+		_NODISCARD bool AffectsInfoTopic(RE::TESTopic* a_topic) { return !_affectedInfo || a_topic->formID == _affectedInfo; }
 		/// @brief Player response to replace the topic with
-		_NODISCARD const char* GetText() { return _text.c_str(); }
+		_NODISCARD std::string GetText() { return _text; }
 		/// @brief If the topic should be hidden (no responses available)
 		_NODISCARD bool IsHidden() { return _hide; }
-		/// @brief Is this topic relevant when pre-processing the affected dialogue topic 
-		_NODISCARD bool HasPreProcessingAction() { return _replaceWith != nullptr || _hide || !_inject.empty(); }
+		/// @brief Is this topic relevant when pre-processing the affected dialogue topic
+		_NODISCARD bool HasPreProcessingAction() { return _replaceWith || _hide || !_inject.empty(); }
 		/// @brief If default processing should continue after edits have been applied (implied true on replacement and false on hide)
 		_NODISCARD bool ShouldProceed() { return _proceed; }
 		/// @brief The topic to replace the affected topic with
-		_NODISCARD RE::TESTopic* GetReplacingTopic() { return _replaceWith; }
+		_NODISCARD RE::TESTopic* GetReplacingTopic() { return RE::TESForm::LookupByID<RE::TESTopic>(_replaceWith); }
 		/// @brief Additional response topics to inject into the dialogue
 		_NODISCARD const std::vector<RE::TESTopic*>& GetInjections() { return _inject; }
 		/// @brief Verify existing conditions met before applying any overrides
@@ -34,9 +36,10 @@ namespace DDR
 		_NODISCARD uint64_t GetPriority() { return _priority; }
 
 	private:
-		RE::FormID _id;
-		std::string _text;
-		RE::TESTopic* _replaceWith{ nullptr };
+		RE::FormID _affectedTopic;
+		RE::FormID _affectedInfo{ 0 };
+		RE::FormID _replaceWith{ 0 };
+		std::string _text{ "" };
 		std::vector<RE::TESTopic*> _inject{};
 		Conditions::Conditional _conditions{};
 		uint64_t _priority{ 0 };
@@ -44,4 +47,4 @@ namespace DDR
 		bool _check{ false };
 		bool _hide{ false };
 	};
-} // namespace DDR
+}	 // namespace DDR

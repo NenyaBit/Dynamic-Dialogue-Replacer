@@ -27,8 +27,7 @@ namespace Conditions
 					head = std::addressof(conditionItem->next);
 					numConditions += 1;
 				} else {
-					logger::info("Aborting condition parsing"sv);
-					return nullptr;
+					throw std::runtime_error("Failed to parse condition: " + std::string(text));
 				}
 			}
 			return numConditions ? condition : nullptr;

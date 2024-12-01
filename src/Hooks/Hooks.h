@@ -37,7 +37,7 @@ namespace DDR
 		thread_local static inline Response _response{};
 
 	private:
-		static inline int64_t AddTopic(RE::MenuTopicManager* a_this, RE::TESTopic* a_topic, int64_t a_3, int64_t a_4);
+		static inline int64_t AddTopic(RE::MenuTopicManager* a_this, RE::TESTopic* a_topic, RE::TESTopic* a_activeTopic, uint64_t a_4);
 		static inline REL::Relocation<decltype(AddTopic)> _AddTopic;
 	};
 

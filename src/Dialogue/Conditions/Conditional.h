@@ -8,12 +8,7 @@ namespace Conditions
 	{
 		Conditional() = default;
 		Conditional(const std::vector<std::string>& a_rawConditions, const ConditionParser::RefMap& a_refs) :
-			_conditions(ConditionParser::ParseConditions(a_rawConditions, a_refs))
-		{
-			if (!_conditions) {
-				throw std::runtime_error("Failed to parse conditions");
-			}
-		}
+			_conditions(ConditionParser::ParseConditions(a_rawConditions, a_refs)) {}
 		~Conditional() = default;
 
 	public:
