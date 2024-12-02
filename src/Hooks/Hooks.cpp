@@ -154,7 +154,7 @@ namespace DDR
 					}
 					const auto speaker = menu->speaker.get().get();
 					auto topics = manager->FindReplacementTopic(formId, speaker, true);
-					std::string text;
+					std::string text{ activeInfo->topicText.c_str() };
 					for (auto&& topic : topics) {
 						if (!topic->GetText().empty()) {
 							text = topic->GetText();
