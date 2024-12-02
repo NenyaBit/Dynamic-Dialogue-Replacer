@@ -14,7 +14,7 @@ namespace DDR
 		_random(a_node["random"].as<std::string>("") == "true" || a_node["random"].as<bool>(false)),
 		_cut(a_node["cut"].as<std::string>("true") == "true" || a_node["cut"].as<bool>(true))
 	{
-		if (_topicInfoId == 0) {
+		if (_topicInfoId == 0 || RE::TESForm::LookupByID<RE::TESTopicInfo>(_topicInfoId) == nullptr) {
 			throw std::runtime_error("Failed to obtain topic info");
 		}
 		if (_responses.empty()) {
