@@ -215,6 +215,7 @@ namespace DDR
 			if (a_replacement.CanApplyReplacement(a_speaker, target, a_type)) {
 				try {
 					std::unique_lock lock{ _luaMutex };
+					a_env["context"] = std::to_underlying(a_type);
 					a_env["speaker_id"] = speakerId;
 					a_env["target_id"] = targetId;
 					sol::protected_function_result result = a_env["replace"](a_text);
