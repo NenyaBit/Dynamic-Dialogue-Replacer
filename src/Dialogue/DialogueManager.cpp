@@ -275,11 +275,20 @@ namespace DDR
 			}
 			return std::string{ form->GetName() };
 		});
+		lua.set_function("send_mod_event", [](const std::string& event, const std::string& argStr, float argNum, uint32_t argForm) {
+			SKSE::ModCallbackEvent modEvent{
+				event,
+				argStr,
+				argNum,
+				argForm ? RE::TESForm::LookupByID(argForm) : nullptr
+			};
+			SKSE::GetModCallbackEventSource()->SendEvent(&modEvent);
+		});
 	}
 
 	bool LuaData::InitializeEnvironment(TextReplacement a_replacement)
 	{
-		sol::environment env{ lua, sol::create, lua.globals() };
+		sol::environment env{ lua, sol::create };
 		if (!env.valid()) {
 			logger::error("Failed to create environment");
 			return false;
@@ -298,6 +307,7 @@ namespace DDR
 			logger::error("Failed to find replace function");
 			return false;
 		}
+		env["global"] = lua.globals();
 		std::string scriptNameStr{ scriptName };
 		env.set_function("log_info", [=](const std::string& message) {
 			logger::info("Lua - {} - {}", scriptNameStr, message);
