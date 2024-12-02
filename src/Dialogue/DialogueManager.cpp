@@ -257,6 +257,34 @@ namespace DDR
 			}
 			return form->IsInFaction(fac);
 		});
+		lua.set_function("has_magic_effect", [](uint32_t a_id, uint32_t a_magicEffect) -> int {
+			auto form = RE::TESForm::LookupByID<RE::Actor>(a_id);
+			auto mgEff = RE::TESForm::LookupByID<RE::EffectSetting>(a_magicEffect);
+			if (!form) {
+				return -1;
+			}
+			return form->AsMagicTarget()->HasMagicEffect(mgEff);
+		});
+		lua.set_function("get_relationship_rank", [](uint32_t a_id, uint32_t a_target) -> std::string {
+			auto form = RE::TESForm::LookupByID<RE::Actor>(a_id);
+			auto target = RE::TESForm::LookupByID<RE::Actor>(a_target);
+			if (!form || !target) {
+				return "";
+			}
+			auto formBase = form->GetActorBase();
+			auto targetBase = target->GetActorBase();
+			if (!formBase || !targetBase || !formBase->relationships) {
+				return "";
+			}
+			for (auto&& it : *formBase->relationships) {
+				if (it->npc1 == targetBase || it->npc2 == targetBase) {
+					auto lv = it->level.get();
+					std::string ret{ magic_enum::enum_name(lv) };
+					return ret;
+				}
+			}
+			return "";
+		});
 		lua.set_function("get_sex", [](uint32_t a_id) -> int {
 			auto form = RE::TESForm::LookupByID(a_id);
 			if (!form) {
