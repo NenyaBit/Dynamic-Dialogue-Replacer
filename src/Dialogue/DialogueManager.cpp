@@ -273,7 +273,14 @@ namespace DDR
 			if (!form) {
 				return "NONE";
 			}
-			return std::string{ form->GetName() };
+			std::string ret{ form->GetName() };
+			if (ret.empty()) {
+				if (auto act = form->As<RE::Actor>()) {
+					const auto base = act->GetActorBase();
+					return base ? base->GetName() : ret;
+				}
+			}
+			return ret;
 		});
 		lua.set_function("send_mod_event", [](const std::string& event, const std::string& argStr, float argNum, uint32_t argForm) {
 			SKSE::ModCallbackEvent modEvent{
