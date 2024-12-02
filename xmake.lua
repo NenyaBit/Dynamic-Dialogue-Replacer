@@ -107,17 +107,17 @@ target(PROJECT_NAME)
     -- Post Build 
     after_build(function (target)
         local mod_folder = os.getenv("XSE_TES5_MODS_PATH")
-        local game_folder = null -- os.getenv("XSE_TES5_GAME_PATH")
+        local game_folder = os.getenv("XSE_TES5_GAME_PATH")
         if game_folder then
-            local compiler_folder = path.join(game_folder, "Papyrus Compiler/PapyrusCompiler.exe")
-            local script_source = "dist/source/scripts"
-            local script_output = "dist/scripts"
-            local flags_file = path.join(game_folder, "Data/Source/Scripts/TESV_Papyrus_Flags.flg")
-            os.execv(compiler_folder, { script_source, 
-                "-i=" .. script_source .. ";" .. path.join(game_folder, "Data/Source/Scripts"), 
-                "-o=" .. script_output, 
-                "-f=" .. flags_file, 
-                "-optimize", "-all" })
+            -- local compiler_folder = path.join(game_folder, "Papyrus Compiler/PapyrusCompiler.exe")
+            -- local script_source = "dist/source/scripts"
+            -- local script_output = "dist/scripts"
+            -- local flags_file = path.join(game_folder, "Data/Source/Scripts/TESV_Papyrus_Flags.flg")
+            -- os.execv(compiler_folder, { script_source, 
+            --     "-i=" .. script_source .. ";" .. path.join(game_folder, "Data/Source/Scripts"), 
+            --     "-o=" .. script_output, 
+            --     "-f=" .. flags_file, 
+            --     "-optimize", "-all" })
             local plugin_folder = "dist/SKSE/Plugins"
             if not os.isdir(plugin_folder) then
                 os.mkdir(plugin_folder)
