@@ -48,8 +48,6 @@ namespace DDR
 		{
 			REL::Relocation<uintptr_t> vtbl(RE::VTABLE_DialogueMenu[0]);
 			_ProcessMessageFn = vtbl.write_vfunc(0x4, &ProcessMessageEx);
-
-			_inject = REL::Module::GetRuntime() == REL::Module::Runtime::AE;
 		}
 
 		RE::UI_MESSAGE_RESULTS ProcessMessageEx(RE::UIMessage& a_message);
@@ -57,10 +55,5 @@ namespace DDR
 	private:
 		using ProcessMessageFn = decltype(&RE::DialogueMenu::ProcessMessage);
 		static inline REL::Relocation<ProcessMessageFn> _ProcessMessageFn;
-
-		static inline int64_t _currId;
-		static inline RE::TESObjectREFR* _currentTarget;
-		static inline std::unordered_map<RE::FormID, std::shared_ptr<Topic>> _cache;
-		static inline bool _inject = true;
 	};
 }

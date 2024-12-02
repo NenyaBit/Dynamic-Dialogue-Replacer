@@ -133,48 +133,42 @@ namespace DDR
 
 	RE::UI_MESSAGE_RESULTS DialogueMenuEx::ProcessMessageEx(RE::UIMessage& a_message)
 	{
+		static std::unordered_map<RE::FormID, std::string> cache;
 		const auto menu = RE::MenuTopicManager::GetSingleton();
 		const auto manager = DialogueManager::GetSingleton();
 		switch (*a_message.type) {
 		case RE::UI_MESSAGE_TYPE::kShow:
-			_currentTarget = menu->speaker.get().get();
-			__fallthrough;
 		case RE::UI_MESSAGE_TYPE::kUpdate:
 			if (const auto dialogue = menu->dialogueList) {
 #pragma warning(suppress : 4834)
 				for (auto it = dialogue->begin(); it != dialogue->end(); it++) {
-					if (auto curr = *it) {
-						const auto id = curr->parentTopic->GetFormID();
-						std::shared_ptr<Topic> replacement;
-						const auto iter = _cache.find(id);
-						if (iter != _cache.end()) {	 // find in cache first
-							replacement = iter->second;
-						} else {	// evaluate and place
-							const auto topics = manager->FindReplacementTopic(id, _currentTarget, false);
-							for (auto&& topic : topics) {
-								if (!topic->GetText().empty()) {
-									replacement = topic;
-									_cache[id] = replacement;
-									break;
-								}
-							}
-							if (!replacement && !topics.empty()) {
-								replacement = topics[0];
-								_cache[id] = replacement;
-							}
-						}
-						std::string text = replacement ? replacement->GetText() : "";
-						if (text.empty()) {
-							text = curr->topicText;
-						}
-						manager->ApplyTextReplacements(text, _currentTarget, ReplacemenType::Topic);
-						curr->topicText = text;
+					const auto activeInfo = *it;
+					if (!activeInfo) {
+						continue;
 					}
+					const auto formId = activeInfo->parentTopic->GetFormID();
+					auto where = cache.find(formId);
+					if (where != cache.end()) {
+						activeInfo->topicText = where->second;
+						continue;
+					}
+					const auto speaker = menu->speaker.get().get();
+					auto topics = manager->FindReplacementTopic(formId, speaker, true);
+					std::string text;
+					for (auto&& topic : topics) {
+						if (!topic->GetText().empty()) {
+							text = topic->GetText();
+							break;
+						}
+					}
+					manager->ApplyTextReplacements(text, speaker, ReplacemenType::Topic);
+					activeInfo->topicText = text;
+					cache[formId] = text;
 				}
 			}
 			break;
 		case RE::UI_MESSAGE_TYPE::kHide:
-			_cache.clear();
+			cache.clear();
 			break;
 		}
 		return _ProcessMessageFn(this, a_message);
