@@ -209,10 +209,14 @@ namespace DDR
 		}
 		const auto actor = a_speaker ? a_speaker->As<RE::Actor>() : nullptr;
 		const auto target = actor ? GetDialogueTarget(actor) : nullptr;
-		_lua.ForEachScript([&](const TextReplacement& a_replacement, const sol::environment& a_env) {
+		const uint32_t speakerId = actor ? actor->GetFormID() : 0;
+		const uint32_t targetId = target ? target->GetFormID() : 0;
+		_lua.ForEachScript([&](const TextReplacement& a_replacement, sol::environment& a_env) {
 			if (a_replacement.CanApplyReplacement(a_speaker, target, a_type)) {
 				try {
 					std::unique_lock lock{ _luaMutex };
+					a_env["speaker_id"] = speakerId;
+					a_env["target_id"] = targetId;
 					sol::protected_function_result result = a_env["replace"](a_text);
 					if (!result.valid()) {
 						sol::error err = result;
@@ -244,7 +248,7 @@ namespace DDR
 			}
 			return a_partialMatch ? form->ContainsKeywordString(a_kwd) : form->HasKeywordString(a_kwd);
 		});
-		lua.set_function("is_in_faction", [](uint32_t a_id, const uint32_t a_faction) -> int {
+		lua.set_function("is_in_faction", [](uint32_t a_id, uint32_t a_faction) -> int {
 			auto form = RE::TESForm::LookupByID<RE::Actor>(a_id);
 			auto fac = RE::TESForm::LookupByID<RE::TESFaction>(a_faction);
 			if (!form || !fac) {
@@ -253,17 +257,21 @@ namespace DDR
 			return form->IsInFaction(fac);
 		});
 		lua.set_function("get_sex", [](uint32_t a_id) -> int {
-			auto form = RE::TESForm::LookupByID<RE::Actor>(a_id);
+			auto form = RE::TESForm::LookupByID(a_id);
 			if (!form) {
 				return RE::SEX::kNone;
+			} else if (auto act = form->As<RE::Actor>()) {
+				auto base = act->GetActorBase();
+				return base ? base->GetSex() : RE::SEX::kNone;
+			} else if (auto npc = form->As<RE::TESNPC>()) {
+				return npc->GetSex();
 			}
-			auto base = form->GetActorBase();
-			return base ? base->GetSex() : RE::SEX::kNone;
+			return RE::SEX::kNone;
 		});
 		lua.set_function("get_name", [](uint32_t a_id) -> std::string {
-			auto form = RE::TESForm::LookupByID<RE::Actor>(a_id);
+			auto form = RE::TESForm::LookupByID(a_id);
 			if (!form) {
-				return "";
+				return "NONE";
 			}
 			return std::string{ form->GetName() };
 		});
@@ -271,12 +279,13 @@ namespace DDR
 
 	bool LuaData::InitializeEnvironment(TextReplacement a_replacement)
 	{
-		sol::environment env{ lua, sol::create };
+		sol::environment env{ lua, sol::create, lua.globals() };
 		if (!env.valid()) {
 			logger::error("Failed to create environment");
 			return false;
 		}
-		const auto scriptPatch = std::format("{}/{}", SCRIPT_PATH, a_replacement.GetScript());
+		const auto scriptName = a_replacement.GetScript();
+		const auto scriptPatch = std::format("{}/{}", SCRIPT_PATH, scriptName);
 		if (!fs::exists(scriptPatch)) {
 			logger::error("Failed to load script. Invalid path - {}", scriptPatch);
 			return false;
@@ -289,11 +298,12 @@ namespace DDR
 			logger::error("Failed to find replace function");
 			return false;
 		}
-		env.set_function("log_info", [script = a_replacement.GetScript()](const std::string& message) {
-			logger::info("Lua - {} - {}", script, message);
+		std::string scriptNameStr{ scriptName };
+		env.set_function("log_info", [=](const std::string& message) {
+			logger::info("Lua - {} - {}", scriptNameStr, message);
 		});
-		env.set_function("log_error", [script = a_replacement.GetScript()](const std::string& message) {
-			logger::error("Lua - {} - {}", script, message);
+		env.set_function("log_error", [=](const std::string& message) {
+			logger::error("Lua - {} - {}", scriptNameStr, message);
 		});
 		if (!env.valid()) {
 			logger::error("Failed to set functions");
@@ -303,9 +313,9 @@ namespace DDR
 		return true;
 	}
 	
-	void LuaData::ForEachScript(std::function<void(const TextReplacement&, const sol::environment&)> a_func) const
+	void LuaData::ForEachScript(std::function<void(const TextReplacement&, sol::environment&)> a_func)
 	{
-		for (const auto& [repl, env] : scripts) {
+		for (auto& [repl, env] : scripts) {
 			a_func(repl, env);
 		}
 	}

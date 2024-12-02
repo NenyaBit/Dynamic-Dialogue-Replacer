@@ -20,7 +20,7 @@ namespace DDR
 		~LuaData() { lua.collect_garbage(); }
 
 		bool InitializeEnvironment(TextReplacement a_replacement);
-		void ForEachScript(std::function<void(const TextReplacement&, const sol::environment&)> a_func) const;
+		void ForEachScript(std::function<void(const TextReplacement&, sol::environment&)> a_func);
 
 	private:
 		sol::state lua{};
