@@ -51,7 +51,8 @@ namespace DDR
 		const auto path{ _responses[a_num - 1].filePath };
 		if (path[0] != '$')
 			return path;
-		auto sections = Util::StringSplitToOwned(path, "\\"sv);
+		auto delim = path.contains('\\') ? "\\"sv : "/"sv;
+		auto sections = Util::StringSplitToOwned(path, delim);
 		for (auto& section : sections) {
 			if (section == "[VOICE_TYPE]") {
 				section = a_voiceType->GetFormEditorID();
