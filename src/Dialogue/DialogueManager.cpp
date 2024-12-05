@@ -324,7 +324,7 @@ namespace DDR
 
 	bool LuaData::InitializeEnvironment(TextReplacement a_replacement)
 	{
-		sol::environment env{ lua, sol::create };
+		sol::environment env{ lua, sol::create, lua.globals() };
 		if (!env.valid()) {
 			logger::error("Failed to create environment");
 			return false;
@@ -343,7 +343,6 @@ namespace DDR
 			logger::error("Failed to find replace function");
 			return false;
 		}
-		env["global"] = lua.globals();
 		std::string scriptNameStr{ scriptName };
 		env.set_function("log_info", [=](const std::string& message) {
 			logger::info("Lua - {} - {}", scriptNameStr, message);
