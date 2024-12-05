@@ -288,14 +288,14 @@ namespace DDR
 		lua.set_function("get_sex", [](uint32_t a_id) -> int {
 			auto form = RE::TESForm::LookupByID(a_id);
 			if (!form) {
-				return RE::SEX::kNone;
+				return -1;
 			} else if (auto act = form->As<RE::Actor>()) {
 				auto base = act->GetActorBase();
-				return base ? base->GetSex() : RE::SEX::kNone;
+				return base ? base->GetSex() : -1;
 			} else if (auto npc = form->As<RE::TESNPC>()) {
 				return npc->GetSex();
 			}
-			return RE::SEX::kNone;
+			return -1;
 		});
 		lua.set_function("get_name", [](uint32_t a_id) -> std::string {
 			auto form = RE::TESForm::LookupByID(a_id);
