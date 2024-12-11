@@ -153,7 +153,7 @@ namespace DDR
 						continue;
 					}
 					const auto speaker = menu->speaker.get().get();
-					auto topics = manager->FindReplacementTopic(formId, speaker, true);
+					auto topics = manager->FindReplacementTopic(formId, speaker, false);
 					std::string text{ activeInfo->topicText.c_str() };
 					for (auto&& topic : topics) {
 						if (!topic->GetText().empty()) {
