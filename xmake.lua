@@ -18,7 +18,8 @@ option_end()
 
 -- Dependencies & Includes
 -- https://github.com/xmake-io/xmake-repo/tree/dev
-add_requires("yaml-cpp", "luajit", "sol2", "frozen", "magic_enum")
+add_requires("yaml-cpp", "sol2", "frozen", "magic_enum")
+add_requires("luajit", { configs = { gc64 = true } })
 
 includes("lib/commonlibsse-ng")
 

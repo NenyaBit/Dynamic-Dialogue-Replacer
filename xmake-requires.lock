@@ -43,7 +43,7 @@
             },
             version = "v5.4.7"
         },
-        ["luajit#31fecfc4"] = {
+        ["luajit#77bdf028"] = {
             repo = {
                 branch = "master",
                 commit = "f6251c012faabeb21d64f50a41e892e56993e77e",
