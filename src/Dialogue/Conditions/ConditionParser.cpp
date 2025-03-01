@@ -13,7 +13,7 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	const std::string refStr{ splits.size() == 2 ? splits[0] : "" };
 
 	static const std::regex re{
-		R"((\w+)\s+((\w+)(\s+([\w:]+))?\s*)?(==|!=|>|>=|<|<=)\s*(\w+)(\s+(AND|OR))?)"
+		R"((\w+)\s+(([\w|.]+)(\s+([\w|.:]+))?\s*)?(==|!=|>|>=|<|<=)\s*(\w+)(\s+(AND|OR))?)"
 	};
 
 	std::smatch m;
