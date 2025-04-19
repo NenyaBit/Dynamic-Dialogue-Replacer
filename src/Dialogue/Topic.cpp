@@ -19,24 +19,29 @@ namespace DDR
 	{
 		if (!_affectedTopic || !RE::TESForm::LookupByID<RE::TESTopic>(_affectedTopic)) {
 			const YAML::Node& errored_node = a_node["id"];
-			throw std::runtime_error(std::format("Line {}:{}: Failed to obtain id topic '{}'", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>()));
+			const auto err = std::format("Line {}:{}: Failed to obtain id topic '{}'", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>());
+			throw std::runtime_error(err);
 		}
 		if (_affectedInfo && !RE::TESForm::LookupByID<RE::TESTopic>(_affectedInfo)) {
 			const YAML::Node& errored_node = a_node["affects"];
-			throw std::runtime_error(std::format("Line {}:{}: Failed to obtain affected topic '{}'. Did you state a TopicInfo ID instead of a Topic ID?", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>()));
+			const auto err = std::format("Line {}:{}: Failed to obtain affected topic '{}'. Did you state a TopicInfo ID instead of a Topic ID?", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>());
+			throw std::runtime_error(err);
 		}
 		if (_replaceWith) {
 			if (!RE::TESForm::LookupByID<RE::TESTopic>(_replaceWith)) {
 				const YAML::Node& errored_node = a_node["replace"];
-				throw std::runtime_error(std::format("Line {}:{}: Failed to obtain replacement topic '{}'", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>()));
+				const auto err = std::format("Line {}:{}: Failed to obtain replacement topic '{}'", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>());
+				throw std::runtime_error(err);
 			} else if (!_affectedInfo) {
 				const YAML::Node& errored_node = a_node;
-				throw std::runtime_error(std::format("Line {}:{}: Missing affected topic. Replacement must specify affected info topic when replacing topic", errored_node.Mark().line, errored_node.Mark().column));
+				const auto err = std::format("Line {}:{}: Missing affected topic. Replacement must specify affected info topic when replacing topic", errored_node.Mark().line, errored_node.Mark().column);
+				throw std::runtime_error(err);
 			} 
 		}
 		if (_text.empty() && !_replaceWith && _inject.empty() && !_hide) {
 			const YAML::Node& errored_node = a_node;
-			throw std::runtime_error(std::format("Line {}:{}: Failed to find text or with/inject topics in replacement", errored_node.Mark().line, errored_node.Mark().column));
+			const auto err = std::format("Line {}:{}: Failed to find text or with/inject topics in replacement", errored_node.Mark().line, errored_node.Mark().column);
+			throw std::runtime_error(err);
 		}
 	}
 
