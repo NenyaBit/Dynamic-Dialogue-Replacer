@@ -18,20 +18,25 @@ namespace DDR
 		_hide(a_node["hide"].as<std::string>("") == "true" || a_node["hide"].as<bool>(false))
 	{
 		if (!_affectedTopic || !RE::TESForm::LookupByID<RE::TESTopic>(_affectedTopic)) {
-			throw std::runtime_error("Failed to obtain affected topic");
+			const YAML::Node& errored_node = a_node["id"];
+			throw std::runtime_error(std::format("Line {}:{}: Failed to obtain id topic '{}'", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>()));
 		}
 		if (_affectedInfo && !RE::TESForm::LookupByID<RE::TESTopic>(_affectedInfo)) {
-			throw std::runtime_error("Failed to obtain affected info topic. Did you state a TopicInfo ID instead of a Topic ID?");
+			const YAML::Node& errored_node = a_node["affects"];
+			throw std::runtime_error(std::format("Line {}:{}: Failed to obtain affected topic '{}'. Did you state a TopicInfo ID instead of a Topic ID?", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>()));
 		}
 		if (_replaceWith) {
 			if (!RE::TESForm::LookupByID<RE::TESTopic>(_replaceWith)) {
-				throw std::runtime_error("Failed to obtain replacement topic");
+				const YAML::Node& errored_node = a_node["replace"];
+				throw std::runtime_error(std::format("Line {}:{}: Failed to obtain replacement topic '{}'", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>()));
 			} else if (!_affectedInfo) {
-				throw std::runtime_error("Missing affected info topic. Replacement must specify affected info topic when replacing topic");
+				const YAML::Node& errored_node = a_node;
+				throw std::runtime_error(std::format("Line {}:{}: Missing affected topic. Replacement must specify affected info topic when replacing topic", errored_node.Mark().line, errored_node.Mark().column));
 			} 
 		}
 		if (_text.empty() && !_replaceWith && _inject.empty() && !_hide) {
-			throw std::runtime_error("Failed to find text or with/inject topics in replacement");
+			const YAML::Node& errored_node = a_node;
+			throw std::runtime_error(std::format("Line {}:{}: Failed to find text or with/inject topics in replacement", errored_node.Mark().line, errored_node.Mark().column));
 		}
 	}
 
