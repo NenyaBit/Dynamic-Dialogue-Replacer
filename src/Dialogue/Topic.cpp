@@ -18,30 +18,20 @@ namespace DDR
 		_hide(a_node["hide"].as<std::string>("") == "true" || a_node["hide"].as<bool>(false))
 	{
 		if (!_affectedTopic || !RE::TESForm::LookupByID<RE::TESTopic>(_affectedTopic)) {
-			const YAML::Node& errored_node = a_node["id"];
-			const auto err = std::format("Line {}:{}: Failed to obtain id topic '{}'", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>());
-			throw std::runtime_error(err);
+			throw std::runtime_error("Failed to obtain id topic");
 		}
 		if (_affectedInfo && !RE::TESForm::LookupByID<RE::TESTopic>(_affectedInfo)) {
-			const YAML::Node& errored_node = a_node["affects"];
-			const auto err = std::format("Line {}:{}: Failed to obtain affected topic '{}'. Did you state a TopicInfo ID instead of a Topic ID?", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>());
-			throw std::runtime_error(err);
+			throw std::runtime_error("Failed to obtain affected topic. Did you state a TopicInfo ID instead of a Topic ID?");
 		}
 		if (_replaceWith) {
 			if (!RE::TESForm::LookupByID<RE::TESTopic>(_replaceWith)) {
-				const YAML::Node& errored_node = a_node["replace"];
-				const auto err = std::format("Line {}:{}: Failed to obtain replacement topic '{}'", errored_node.Mark().line, errored_node.Mark().column, errored_node.as<std::string>());
-				throw std::runtime_error(err);
+				throw std::runtime_error("Failed to obtain replacement topic '{}'");
 			} else if (!_affectedInfo) {
-				const YAML::Node& errored_node = a_node;
-				const auto err = std::format("Line {}:{}: Missing affected topic. Replacement must specify affected info topic when replacing topic", errored_node.Mark().line, errored_node.Mark().column);
-				throw std::runtime_error(err);
+				throw std::runtime_error("Missing affected topic. Replacement must specify affected info topic when replacing topic");
 			} 
 		}
 		if (_text.empty() && !_replaceWith && _inject.empty() && !_hide) {
-			const YAML::Node& errored_node = a_node;
-			const auto err = std::format("Line {}:{}: Failed to find text or with/inject topics in replacement", errored_node.Mark().line, errored_node.Mark().column);
-			throw std::runtime_error(err);
+			throw std::runtime_error("Failed to find text or replace/inject topics in replacement");
 		}
 	}
 
