@@ -25,7 +25,7 @@ namespace DDR
 		}
 		if (_replaceWith) {
 			if (!RE::TESForm::LookupByID<RE::TESTopic>(_replaceWith)) {
-				throw std::runtime_error("Failed to obtain replacement topic '{}'");
+				throw std::runtime_error("Failed to obtain replacement topic");
 			} else if (!_affectedInfo) {
 				throw std::runtime_error("Missing affected topic. Replacement must specify affected info topic when replacing topic");
 			} 
