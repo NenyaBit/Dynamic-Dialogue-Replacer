@@ -94,14 +94,13 @@ namespace DDR
 		}
 		bool hasValidResponse = false;
 		auto currInfo = a_activeTopic->topicInfos;
-		for (auto i = a_activeTopic->numTopicInfos; i > 0; i--) {
+		for (auto i = a_activeTopic->numTopicInfos; i > 0; (i--, currInfo++)) {
 			if (currInfo && *currInfo) {
 				if ((*currInfo)->objConditions.IsTrue(target, RE::PlayerCharacter::GetSingleton())) {
 					hasValidResponse = true;
 					break;
 				}
 			}
-			currInfo++;
 		}
 		bool firstPass = !a_this->dialogueList || a_this->dialogueList->empty();
 		for (auto&& it : topics) {

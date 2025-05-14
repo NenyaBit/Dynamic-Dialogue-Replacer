@@ -13,9 +13,9 @@ namespace DDR
 		~Topic() = default;
 
 		/// @brief FormID of the affected topic
-		_NODISCARD RE::FormID GetId() { return _affectedTopic; }
+		_NODISCARD RE::FormID GetId() { return _id; }
 		/// @brief Check if the topic is affected by the replacement
-		_NODISCARD bool AffectsInfoTopic(RE::TESTopic* a_topic) { return !_affectedInfo || a_topic->formID == _affectedInfo; }
+		_NODISCARD bool AffectsInfoTopic(RE::TESTopic* a_topic) { return !_affectedTopic || a_topic->formID == _affectedTopic; }
 		/// @brief Player response to replace the topic with
 		_NODISCARD std::string GetText() { return _text; }
 		/// @brief If the topic should be hidden (no responses available)
@@ -36,8 +36,8 @@ namespace DDR
 		_NODISCARD uint64_t GetPriority() { return _priority; }
 
 	private:
-		RE::FormID _affectedTopic;
-		RE::FormID _affectedInfo{ 0 };
+		RE::FormID _id;
+		RE::FormID _affectedTopic{ 0 };
 		RE::FormID _replaceWith{ 0 };
 		std::string _text{ "" };
 		std::vector<RE::TESTopic*> _inject{};

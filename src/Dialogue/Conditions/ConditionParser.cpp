@@ -29,8 +29,8 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	auto& mOperator = m[6];
 	auto& mComparand = m[7];
 	auto& mConnective = m[9];
-	logger::info("Match results: Func: {}, Param1: {}, Param2: {}, Operator: {}, Comparand: {}, Connective: {}",
-			mFunction.str(), mParam1.str(), mParam2.str(), mOperator.str(), mComparand.str(), mConnective.str());
+	logger::info("Matching {}. Results: Func: {}, Param1: {}, Param2: {}, Operator: {}, Comparand: {}, Connective: {}",
+			text, mFunction.str(), mParam1.str(), mParam2.str(), mOperator.str(), mComparand.str(), mConnective.str());
 
 	auto function = RE::SCRIPT_FUNCTION::LocateScriptCommand(mFunction.str().data());
 	if (!function || !function->conditionFunction) {

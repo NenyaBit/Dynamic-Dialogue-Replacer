@@ -52,8 +52,9 @@ namespace YAML
 	{
 		static bool decode(const Node& node, DDR::Response& rhs)
 		{
-			rhs.subtitle = node["subtitle"].as<std::string>("");
-			if (rhs.subtitle.empty()) {
+			if (node["subtitle"].IsDefined()) {
+				rhs.subtitle = node["subtitle"].as<std::string>("");
+			} else {
 				rhs.subtitle = node["sub"].as<std::string>("");
 			}
 			rhs.filePath = node["path"].as<std::string>("");

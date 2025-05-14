@@ -15,7 +15,7 @@ namespace DDR
 		_cut(a_node["cut"].as<std::string>("true") == "true" || a_node["cut"].as<bool>(true))
 	{
 		if (_topicInfoId == 0) {
-			throw std::runtime_error("Failed to obtain topic info");
+			throw std::runtime_error("Invalid topic info id");
 		}
 		if (_responses.empty()) {
 			const auto err = std::format("Failed to find responses in replacement {}", _topicInfoId);
