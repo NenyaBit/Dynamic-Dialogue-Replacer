@@ -65,7 +65,11 @@ namespace Conditions
 			if (auto it = a_refs.find(a_text); it != a_refs.end()) {
 				return it->second->As<T>();
 			}
-			return Util::FormFromString<T>(a_text);
+			auto retVal = Util::FormFromString<T>(a_text);
+			if (retVal) {
+				return retVal;
+			}
+			return RE::TESForm::LookupByEditorID<T>(a_text);
 		}
 	};
 }
