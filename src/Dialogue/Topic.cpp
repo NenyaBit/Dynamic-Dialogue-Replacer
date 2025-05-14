@@ -18,20 +18,20 @@ namespace DDR
 		_hide(a_node["hide"].as<std::string>("") == "true" || a_node["hide"].as<bool>(false))
 	{
 		if (!_affectedTopic || !RE::TESForm::LookupByID<RE::TESTopic>(_affectedTopic)) {
-			throw std::runtime_error("Failed to obtain affected topic");
+			throw std::runtime_error("Failed to obtain id topic");
 		}
 		if (_affectedInfo && !RE::TESForm::LookupByID<RE::TESTopic>(_affectedInfo)) {
-			throw std::runtime_error("Failed to obtain affected info topic. Did you state a TopicInfo ID instead of a Topic ID?");
+			throw std::runtime_error("Failed to obtain affected topic. Did you state a TopicInfo ID instead of a Topic ID?");
 		}
 		if (_replaceWith) {
 			if (!RE::TESForm::LookupByID<RE::TESTopic>(_replaceWith)) {
 				throw std::runtime_error("Failed to obtain replacement topic");
 			} else if (!_affectedInfo) {
-				throw std::runtime_error("Missing affected info topic. Replacement must specify affected info topic when replacing topic");
+				throw std::runtime_error("Missing affected topic. Replacement must specify affected info topic when replacing topic");
 			} 
 		}
 		if (_text.empty() && !_replaceWith && _inject.empty() && !_hide) {
-			throw std::runtime_error("Failed to find text or with/inject topics in replacement");
+			throw std::runtime_error("Failed to find text or replace/inject topics in replacement");
 		}
 	}
 
