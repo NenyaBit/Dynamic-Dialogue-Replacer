@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Conditions/RefMap.h"
 #include "Conditions/Conditional.h"
 #include "Util/FormLookup.h"
 
@@ -8,7 +9,7 @@ namespace DDR
 	class Topic
 	{
 	public:
-		Topic(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
+		Topic(const YAML::Node& a_node, const Conditions::RefMap& a_refMap);
 		Topic(RE::FormID a_id, std::string a_text);
 		~Topic() = default;
 

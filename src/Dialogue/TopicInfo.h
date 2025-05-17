@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Conditions/Conditional.h"
+#include "Conditions/RefMap.h"
 #include "Util/FormLookup.h"
 #include "Util/StringUtil.h"
 
@@ -16,7 +17,7 @@ namespace DDR
 	class TopicInfo
 	{
 	public:
-		TopicInfo(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
+		TopicInfo(const YAML::Node& a_node, const Conditions::RefMap& a_refMap);
 		~TopicInfo() = default;
 
 		_NODISCARD static std::string GenerateHash(RE::FormID a_id, const RE::BGSVoiceType* a_voiceType);

@@ -2,16 +2,16 @@
 
 namespace DDR
 {
-	Topic::Topic(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs) :
-		_id(Util::FormFromString(a_node["id"].as<std::string>(""))),
-		_affectedTopic(Util::FormFromString(a_node["affects"].as<std::string>(""))),
-		_replaceWith(Util::FormFromString(a_node["replace"].IsDefined() ? a_node["replace"].as<std::string>("") : a_node["with"].as<std::string>(""))),
+	Topic::Topic(const YAML::Node& a_node, const Conditions::RefMap& a_refMap) :
+		_id(a_refMap.LookupId(a_node["id"].as<std::string>(""))),
+		_affectedTopic(a_refMap.LookupId(a_node["affects"].as<std::string>(""))),
+		_replaceWith(a_refMap.LookupId(a_node["replace"].IsDefined() ? a_node["replace"].as<std::string>("") : a_node["with"].as<std::string>(""))),
 		_text(a_node["text"].as<std::string>("")),
 		_inject(a_node["inject"].as<std::vector<std::string>>(std::vector<std::string>{}) |
-						std::ranges::views::transform([](const auto& str) { return Util::FormFromString<RE::TESTopic>(str); }) |
+						std::ranges::views::transform([&](const auto& str) { return a_refMap.Lookup<RE::TESTopic>(str); }) |
 						std::ranges::views::filter([](const auto it) { return it != nullptr; }) |
 						std::ranges::to<std::vector>()),
-		_conditions(Conditions::Conditional{ a_node["conditions"].as<std::vector<std::string>>(std::vector<std::string>{}), a_refs }),
+		_conditions(Conditions::Conditional{ a_node["conditions"].as<std::vector<std::string>>(std::vector<std::string>{}), a_refMap }),
 		_priority(a_node["priority"].as<uint64_t>(0)),
 		_proceed(a_node["proceed"].as<std::string>("true") == "true" || a_node["proceed"].as<bool>(true)),
 		_check(a_node["check"].as<std::string>("") == "true" || a_node["check"].as<bool>(false)),

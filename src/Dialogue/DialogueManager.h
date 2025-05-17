@@ -4,10 +4,11 @@
 #include <lua.hpp>
 #include <sol/sol.hpp>
 
-#include "Util/Singleton.h"
+#include "Conditions/RefMap.h"
 #include "TextReplacement.h"
 #include "Topic.h"
 #include "TopicInfo.h"
+#include "Util/Singleton.h"
 
 namespace DDR
 {
@@ -43,8 +44,8 @@ namespace DDR
 		void ApplyTextReplacements(std::string& a_text, RE::TESObjectREFR* a_speaker, ReplacemenType a_type);
 
 	private:
-		size_t ParseResponses(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
-		size_t ParseTopics(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs);
+		size_t ParseResponses(const YAML::Node& a_node, const Conditions::RefMap& a_refMap);
+		size_t ParseTopics(const YAML::Node& a_node, const Conditions::RefMap& a_refMap);
 		size_t ParseScripts(const YAML::Node& a_node);
 
 	private:

@@ -1,14 +1,15 @@
 #pragma once
 
 #include "ConditionParser.h"
+#include "RefMap.h"
 
 namespace Conditions
 {
 	struct Conditional
 	{
 		Conditional() = default;
-		Conditional(const std::vector<std::string>& a_rawConditions, const ConditionParser::RefMap& a_refs) :
-			_conditions(ConditionParser::ParseConditions(a_rawConditions, a_refs)) {}
+		Conditional(const std::vector<std::string>& a_rawConditions, const RefMap& a_refMap) :
+			_conditions(ConditionParser::ParseConditions(a_rawConditions, a_refMap)) {}
 		~Conditional() = default;
 
 	public:

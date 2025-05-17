@@ -6,7 +6,7 @@ using namespace Conditions;
 
 // stolen from DAV (https://github.com/Exit-9B/DynamicArmorVariants)
 
-auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE::TESConditionItem*
+RE::TESConditionItem* ConditionParser::Parse(std::string_view a_text, const RefMap& a_refMap)
 {
 	const auto splits = Util::StringSplitToOwned(std::string{ a_text }, "<>"sv);
 	const std::string text{ splits.size() == 2 ? splits[1] : splits[0] };
@@ -44,7 +44,7 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	if (mParam1.matched) {
 		if (function->numParams >= 1) {
 			data.functionData.params[0] = std::bit_cast<void*>(
-					ParseParam(mParam1.str(), function->params[0].paramType.get(), a_refs));
+					ParseParam(mParam1.str(), function->params[0].paramType.get(), a_refMap));
 		} else {
 			logger::warn("Condition function {} ignoring parameter: {}", function->functionName, mParam1.str());
 		}
@@ -53,7 +53,7 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	if (mParam2.matched) {
 		if (function->numParams >= 2) {
 			data.functionData.params[1] = std::bit_cast<void*>(
-					ParseParam(mParam2.str(), function->params[1].paramType.get(), a_refs));
+					ParseParam(mParam2.str(), function->params[1].paramType.get(), a_refMap));
 		} else {
 			logger::warn("Condition function {} ignoring parameter: {}", function->functionName, mParam2.str());
 		}
@@ -98,7 +98,7 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	}
 
 	if (!refStr.empty()) {
-		if (const auto ref = LookupForm<RE::TESObjectREFR>(refStr, a_refs)) {
+		if (const auto ref = a_refMap.Lookup<RE::TESObjectREFR>(refStr)) {
 			data.runOnRef = ref->CreateRefHandle();
 			data.object = RE::CONDITIONITEMOBJECT::kRef;
 		} else {
@@ -111,7 +111,26 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	return conditionItem;
 }
 
-ConditionParser::ConditionParam ConditionParser::ParseParam(const std::string& a_text, RE::SCRIPT_PARAM_TYPE a_type, const RefMap& a_refs)
+std::shared_ptr<RE::TESCondition> ConditionParser::ParseConditions(const std::vector<std::string>& a_rawConditions, const RefMap& a_refMap)
+{
+	auto condition = std::make_shared<RE::TESCondition>();
+	RE::TESConditionItem** head = std::addressof(condition->head);
+	int numConditions = 0;
+	for (auto& text : a_rawConditions) {
+		if (text.empty())
+			continue;
+		if (auto conditionItem = ConditionParser::Parse(text, a_refMap)) {
+			*head = conditionItem;
+			head = std::addressof(conditionItem->next);
+			numConditions += 1;
+		} else {
+			throw std::runtime_error("Failed to parse condition: " + std::string(text));
+		}
+	}
+	return numConditions ? condition : nullptr;
+}
+
+ConditionParser::ConditionParam ConditionParser::ParseParam(const std::string& a_text, RE::SCRIPT_PARAM_TYPE a_type, const RefMap& a_refMap)
 {
 	ConditionParam param{};
 	auto textCIS = Util::CastUpper(a_text);
@@ -141,7 +160,7 @@ ConditionParser::ConditionParam ConditionParser::ParseParam(const std::string& a
 		param.str = new RE::BSString(a_text.c_str());
 		break;
 	default:
-		param.form = LookupForm(textCIS, a_refs);
+		param.form = a_refMap.Lookup(textCIS);
 		break;
 	}
 	return param;

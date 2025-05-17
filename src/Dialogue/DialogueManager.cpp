@@ -1,5 +1,6 @@
 #include "DialogueManager.h"
 
+#include "Conditions/RefMap.h"
 #include "Util/Random.h"
 
 namespace DDR
@@ -22,8 +23,8 @@ namespace DDR
 			const std::string fileName = entry.path().string();
 			try {
 				const auto file = YAML::LoadFile(fileName);
-				const auto refs = file["refs"].as<std::unordered_map<std::string, std::string>>(std::unordered_map<std::string, std::string>{});
-				const auto refMap = Conditions::ConditionParser::GenerateRefMap(refs);
+				const auto refs = file["refs"].as<std::vector<std::pair<std::string, std::string>>>(std::vector<std::pair<std::string, std::string>>{});
+				const Conditions::RefMap refMap{ refs };
 				size_t responses = ParseResponses(file, refMap);
 				size_t topics = ParseTopics(file, refMap);
 				size_t scripts = ParseScripts(file);
@@ -42,7 +43,7 @@ namespace DDR
 		sortByPriority(_responseReplacements);
 	}
 	
-	size_t DialogueManager::ParseResponses(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs)
+	size_t DialogueManager::ParseResponses(const YAML::Node& a_node, const Conditions::RefMap& a_refMap)
 	{
 		const auto node = a_node["topicInfos"];
 		if (!node.IsDefined() || !node.IsSequence()) {
@@ -51,7 +52,7 @@ namespace DDR
 		size_t responses = 0;
 		for (const auto&& it : node) {
 			try {
-				const auto repl = std::make_shared<TopicInfo>(it, a_refs);
+				const auto repl = std::make_shared<TopicInfo>(it, a_refMap);
 				for (const auto& hash : repl->GetHashes()) {
 					_responseReplacements[hash].emplace_back(repl);
 				}
@@ -63,7 +64,7 @@ namespace DDR
 		return responses;
 	}
 
-	size_t DialogueManager::ParseTopics(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs)
+	size_t DialogueManager::ParseTopics(const YAML::Node& a_node, const Conditions::RefMap& a_refMap)
 	{
 		const auto node = a_node["topics"];
 		if (!node.IsDefined() || !node.IsSequence()) {
@@ -72,7 +73,7 @@ namespace DDR
 		size_t topics = 0;
 		for (const auto&& it : node) {
 			try {
-				const auto repl = std::make_shared<Topic>(it, a_refs);
+				const auto repl = std::make_shared<Topic>(it, a_refMap);
 				if (auto id = repl->GetId(); id != 0) {
 					_topicReplacements[id].emplace_back(repl);
 				} else {
