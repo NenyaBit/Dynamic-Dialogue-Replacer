@@ -14,8 +14,9 @@ namespace DDR
 
 		/// @brief FormID of the affected topic
 		_NODISCARD RE::FormID GetId() { return _id; }
+		_NODISCARD RE::FormID GetAffectedTopic() { return _affectedTopic; }
 		/// @brief Check if the topic is affected by the replacement
-		_NODISCARD bool AffectsInfoTopic(RE::TESTopic* a_topic) { return !_affectedTopic || a_topic->formID == _affectedTopic; }
+		_NODISCARD bool AffectsInfoTopic(RE::TESTopic* a_topic) { return a_topic->formID == _affectedTopic; }
 		/// @brief Player response to replace the topic with
 		_NODISCARD std::string GetText() { return _text; }
 		/// @brief If the topic should be hidden (no responses available)

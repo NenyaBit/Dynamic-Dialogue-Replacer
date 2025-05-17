@@ -32,16 +32,14 @@ namespace DDR
 				logger::info("Failed to load {} - {}", fileName, e.what());
 			}
 		}
-		for (auto& [_, replacements] : _topicReplacements) {
-			std::ranges::sort(replacements, [](const auto& a, const auto& b) {
-				return a->GetPriority() > b->GetPriority();
-			});
-		}
-		for (auto& [_, replacements] : _responseReplacements) {
-			std::ranges::sort(replacements, [](const auto& a, const auto& b) {
-				return a->GetPriority() > b->GetPriority();
-			});
-		}
+		auto sortByPriority = [](auto& map) {
+			for (auto& [_, vec] : map) {
+				std::ranges::sort(vec, [](const auto& a, const auto& b) { return a->GetPriority() > b->GetPriority(); });
+			}
+		};
+		sortByPriority(_topicReplacements);
+		sortByPriority(_topicReplacementOrphans);
+		sortByPriority(_responseReplacements);
 	}
 	
 	size_t DialogueManager::ParseResponses(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs)
@@ -75,7 +73,11 @@ namespace DDR
 		for (const auto&& it : node) {
 			try {
 				const auto repl = std::make_shared<Topic>(it, a_refs);
-				_topicReplacements[repl->GetId()].emplace_back(repl);
+				if (auto id = repl->GetId(); id != 0) {
+					_topicReplacements[id].emplace_back(repl);
+				} else {
+					_topicReplacementOrphans[repl->GetAffectedTopic()].emplace_back(repl);
+				}
 				topics++;
 			} catch (std::exception& e) {
 				logger::info("Line {}: Failed to load topic replacement - {}", it.Mark().line, e.what());
@@ -156,25 +158,31 @@ namespace DDR
 		return nullptr;
 	}
 
-	std::vector<std::shared_ptr<Topic>> DialogueManager::FindReplacementTopic(RE::FormID a_id, RE::TESObjectREFR* a_target, bool a_preprocessing)
+	std::vector<std::shared_ptr<Topic>> DialogueManager::FindReplacementTopic(RE::FormID a_parentId, RE::FormID a_topicId, RE::TESObjectREFR* a_target, bool a_preprocessing)
 	{
 		std::vector<std::shared_ptr<Topic>> ret{};
 		if (_tempTopicMutex.try_lock()) {
-			if (_tempTopicKeys.contains(a_id)) {
-				ret.push_back(_tempTopicReplacements[a_id]);
+			if (_tempTopicKeys.contains(a_parentId)) {
+				ret.push_back(_tempTopicReplacements[a_parentId]);
 			}
 			_tempTopicMutex.unlock();
 		}
-		if (_topicReplacements.contains(a_id)) {
-			const auto& replacements = _topicReplacements[a_id];
+		const auto player = RE::PlayerCharacter::GetSingleton();
+		const auto append = [&](const auto& topicMap, const auto findId) {
+			auto iter = topicMap.find(findId);
+			if (iter == topicMap.end())
+				return;
+			const auto& replacements = iter->second;
 			for (const auto& repl : replacements) {
 				if (a_preprocessing && !repl->HasPreProcessingAction())
 					continue;
-				if (repl->ConditionsMet(RE::PlayerCharacter::GetSingleton(), a_target)) {
+				if (repl->ConditionsMet(player, a_target)) {
 					ret.push_back(repl);
 				}
 			}
-		}
+		};
+		append(_topicReplacements, a_parentId);
+		append(_topicReplacementOrphans, a_topicId);
 		return ret;
 	}
 

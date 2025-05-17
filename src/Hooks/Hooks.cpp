@@ -84,17 +84,16 @@ namespace DDR
 
 	int64_t Hooks::AddTopic(RE::MenuTopicManager* a_this, RE::TESTopic* a_topic, RE::TESTopic* a_activeTopic, uint64_t a_4)
 	{
-		if (!a_activeTopic) {
-			return _AddTopic(a_this, a_topic, a_activeTopic, a_4);
-		}
+		const auto parentId = a_activeTopic ? a_activeTopic->GetFormID() : 0;
+		const auto topicId = a_topic->GetFormID();
 		const auto target = a_this->speaker.get().get();
-		auto topics = DialogueManager::GetSingleton()->FindReplacementTopic(a_activeTopic->GetFormID(), target, true);
-		if (topics.empty()) {
+		auto topicEdits = DialogueManager::GetSingleton()->FindReplacementTopic(parentId, topicId, target, true);
+		if (topicEdits.empty()) {
 			return _AddTopic(a_this, a_topic, a_activeTopic, a_4);
 		}
 		bool hasValidResponse = false;
-		auto currInfo = a_activeTopic->topicInfos;
-		for (auto i = a_activeTopic->numTopicInfos; i > 0; (i--, currInfo++)) {
+		auto currInfo = a_topic->topicInfos;
+		for (auto i = a_topic->numTopicInfos; i > 0; (i--, currInfo++)) {
 			if (currInfo && *currInfo) {
 				if ((*currInfo)->objConditions.IsTrue(target, RE::PlayerCharacter::GetSingleton())) {
 					hasValidResponse = true;
@@ -103,7 +102,7 @@ namespace DDR
 			}
 		}
 		bool firstPass = !a_this->dialogueList || a_this->dialogueList->empty();
-		for (auto&& it : topics) {
+		for (auto&& it : topicEdits) {
 			if (!hasValidResponse && it->VerifyExistingConditions()) {
 				continue;
 			}
@@ -152,7 +151,7 @@ namespace DDR
 						continue;
 					}
 					const auto speaker = menu->speaker.get().get();
-					auto topics = manager->FindReplacementTopic(formId, speaker, false);
+					auto topics = manager->FindReplacementTopic(formId, 0, speaker, false);
 					std::string text{ activeInfo->topicText.c_str() };
 					for (auto&& topic : topics) {
 						if (!topic->GetText().empty()) {

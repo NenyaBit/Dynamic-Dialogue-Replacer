@@ -3,7 +3,7 @@
 namespace DDR
 {
 	Topic::Topic(const YAML::Node& a_node, const Conditions::ConditionParser::RefMap& a_refs) :
-		_id(Util::FormFromString(a_node["id"].as<std::string>())),
+		_id(Util::FormFromString(a_node["id"].as<std::string>(""))),
 		_affectedTopic(Util::FormFromString(a_node["affects"].as<std::string>(""))),
 		_replaceWith(Util::FormFromString(a_node["replace"].IsDefined() ? a_node["replace"].as<std::string>("") : a_node["with"].as<std::string>(""))),
 		_text(a_node["text"].as<std::string>("")),
@@ -17,7 +17,7 @@ namespace DDR
 		_check(a_node["check"].as<std::string>("") == "true" || a_node["check"].as<bool>(false)),
 		_hide(a_node["hide"].as<std::string>("") == "true" || a_node["hide"].as<bool>(false))
 	{
-		if (!_id || !RE::TESForm::LookupByID<RE::TESTopic>(_id)) {
+		if (_id != 0 && !RE::TESForm::LookupByID<RE::TESTopic>(_id)) {
 			throw std::runtime_error("Invalid topic id");
 		}
 		if (_affectedTopic && !RE::TESForm::LookupByID<RE::TESTopic>(_affectedTopic)) {
@@ -29,6 +29,15 @@ namespace DDR
 			} else if (!_affectedTopic) {
 				throw std::runtime_error("Missing affected topic. Replacement must specify a topic to replace");
 			} 
+		}
+		if (_hide && _replaceWith) {
+			throw std::runtime_error("Replacement and hide cannot be used together");
+		}
+		if (_hide && !_affectedTopic) {
+			throw std::runtime_error("Hide must specify a topic to hide");
+		}
+		if (!_inject.empty() && _id == 0) {
+			throw std::runtime_error("Injection topics must specify a topic id");
 		}
 		if (_text.empty() && !_replaceWith && _inject.empty() && !_hide) {
 			throw std::runtime_error("Invalid topic: no text, replacement, injection, or hide flag specified. This topic does nothing.");

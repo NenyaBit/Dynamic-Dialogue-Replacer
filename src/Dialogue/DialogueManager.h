@@ -36,7 +36,7 @@ namespace DDR
 	public:
 		void Init();
 		std::shared_ptr<TopicInfo> FindReplacementResponse(RE::Character* a_speaker, RE::TESTopicInfo* a_topicInfo, RE::TESTopicInfo::ResponseData* a_responseData);
-		std::vector<std::shared_ptr<Topic>> FindReplacementTopic(RE::FormID a_id, RE::TESObjectREFR* a_target, bool a_preprocessing);
+		std::vector<std::shared_ptr<Topic>> FindReplacementTopic(RE::FormID a_parentId, RE::FormID a_topicId, RE::TESObjectREFR* a_target, bool a_preprocessing);
 
 		std::string AddReplacementTopic(RE::FormID a_topicId, std::string a_text);
 		void RemoveReplacementTopic(RE::FormID a_topicId, std::string a_key);
@@ -52,6 +52,7 @@ namespace DDR
 		std::mutex _luaMutex{};
 		std::map<std::string, std::vector<std::shared_ptr<TopicInfo>>> _responseReplacements;
 		std::unordered_map<RE::FormID, std::vector<std::shared_ptr<Topic>>> _topicReplacements;
+		std::unordered_map<RE::FormID, std::vector<std::shared_ptr<Topic>>> _topicReplacementOrphans;	// Replacements without a parent topic
 
 		std::unordered_map<RE::FormID, std::string> _tempTopicKeys;
 		std::unordered_map<RE::FormID, std::shared_ptr<Topic>> _tempTopicReplacements;
