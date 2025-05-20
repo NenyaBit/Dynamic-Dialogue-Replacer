@@ -58,7 +58,7 @@ namespace DDR
 				}
 				responses++;
 			} catch (std::exception& e) {
-				logger::info("Line {}: Failed to load response replacement - {}", it.Mark().line, e.what());
+				logger::info("Line {}: Failed to load response replacement - {}", 1 + it.Mark().line, e.what());
 			}
 		}
 		return responses;
@@ -81,7 +81,7 @@ namespace DDR
 				}
 				topics++;
 			} catch (std::exception& e) {
-				logger::info("Line {}: Failed to load topic replacement - {}", it.Mark().line, e.what());
+				logger::info("Line {}: Failed to load topic replacement - {}", 1 + it.Mark().line, e.what());
 			}
 		}
 		return topics;
@@ -98,12 +98,12 @@ namespace DDR
 			try {
 				TextReplacement repl{ it };
 				if (!_lua.InitializeEnvironment(repl)) {
-					logger::info("Line {}: Failed to initialize environment for script {}", it.Mark().line, repl.GetScript());
+					logger::info("Line {}: Failed to initialize environment for script {}", 1 + it.Mark().line, repl.GetScript());
 				} else {
 					scripts++;
 				}
 			} catch (std::exception& e) {
-				logger::info("Line {}: Failed to load script - {}", it.Mark().line, e.what());
+				logger::info("Line {}: Failed to load script - {}", 1 + it.Mark().line, e.what());
 			}
 		}
 		return scripts;
