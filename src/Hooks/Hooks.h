@@ -53,8 +53,6 @@ namespace DDR
 		RE::UI_MESSAGE_RESULTS ProcessMessageEx(RE::UIMessage& a_message);
 
 	private:
-		RE::FormID _activeRootId{ 0 };
-
 		using ProcessMessageFn = decltype(&RE::DialogueMenu::ProcessMessage);
 		static inline REL::Relocation<ProcessMessageFn> _ProcessMessageFn;
 	};

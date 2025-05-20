@@ -132,6 +132,7 @@ namespace DDR
 	RE::UI_MESSAGE_RESULTS DialogueMenuEx::ProcessMessageEx(RE::UIMessage& a_message)
 	{
 		static std::unordered_map<RE::FormID, std::string> cache;
+		static RE::FormID _activeRootId = 0;
 		const auto menu = RE::MenuTopicManager::GetSingleton();
 		const auto manager = DialogueManager::GetSingleton();
 		const auto rootId = menu->rootTopicInfo ? menu->rootTopicInfo->GetFormID() : 0xFFFFFFFF;
