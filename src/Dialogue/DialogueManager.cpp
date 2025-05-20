@@ -211,7 +211,7 @@ namespace DDR
 		_tempTopicReplacements.erase(a_topicId);
 	}
 	
-	void DialogueManager::ApplyTextReplacements(std::string& a_text, RE::TESObjectREFR* a_speaker, ReplacemenType a_type)
+	void DialogueManager::ApplyTextReplacements(std::string& a_text, RE::TESObjectREFR* a_speaker, ReplacementType a_type)
 	{
 		if (a_text.empty()) {
 			return;

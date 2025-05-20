@@ -63,7 +63,7 @@ namespace DDR
 		} else {
 			text = a_text;
 		}
-		DialogueManager::GetSingleton()->ApplyTextReplacements(text, _response.speaker, ReplacemenType::Response);
+		DialogueManager::GetSingleton()->ApplyTextReplacements(text, _response.speaker, ReplacementType::Response);
 		return _SetSubtitle(a_response, text.data(), a_3);
 	}
 
@@ -131,6 +131,7 @@ namespace DDR
 
 	RE::UI_MESSAGE_RESULTS DialogueMenuEx::ProcessMessageEx(RE::UIMessage& a_message)
 	{
+		static RE::FormID _activeRootId{ 0 };
 		static std::unordered_map<RE::FormID, std::string> cache;
 		static RE::FormID _activeRootId = 0;
 		const auto menu = RE::MenuTopicManager::GetSingleton();
@@ -147,29 +148,29 @@ namespace DDR
 				cache.clear();
 			}
 			if (const auto dialogue = menu->dialogueList) {
-#pragma warning(suppress : 4834)
+				#pragma warning(suppress : 4834)
 				for (auto it = dialogue->begin(); it != dialogue->end(); it++) {
-					const auto activeInfo = *it;
-					if (!activeInfo) {
+					const auto activeTopic = *it;
+					if (!activeTopic) {
 						continue;
 					}
-					const auto formId = activeInfo->parentTopic->GetFormID();
+					const auto formId = activeTopic->parentTopic->GetFormID();
 					auto where = cache.find(formId);
 					if (where != cache.end()) {
-						activeInfo->topicText = where->second;
+						activeTopic->topicText = where->second;
 						continue;
 					}
 					const auto speaker = menu->speaker.get().get();
 					auto topics = manager->FindReplacementTopic(formId, 0, speaker, false);
-					std::string text{ activeInfo->topicText.c_str() };
+					std::string text{ activeTopic->topicText.c_str() };
 					for (auto&& topic : topics) {
 						if (!topic->GetText().empty()) {
 							text = topic->GetText();
 							break;
 						}
 					}
-					manager->ApplyTextReplacements(text, speaker, ReplacemenType::Topic);
-					activeInfo->topicText = text;
+					manager->ApplyTextReplacements(text, speaker, ReplacementType::Topic);
+					activeTopic->topicText = text;
 					cache[formId] = text;
 				}
 			}
