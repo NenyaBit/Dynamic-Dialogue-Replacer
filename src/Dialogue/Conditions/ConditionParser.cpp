@@ -29,7 +29,7 @@ RE::TESConditionItem* ConditionParser::Parse(std::string_view a_text, const RefM
 	auto& mOperator = m[6];
 	auto& mComparand = m[7];
 	auto& mConnective = m[9];
-	logger::info("Matching {}. Results: Func: {}, Param1: {}, Param2: {}, Operator: {}, Comparand: {}, Connective: {}",
+	logger::debug("Matching {}. Results: Func: {}, Param1: {}, Param2: {}, Operator: {}, Comparand: {}, Connective: {}",
 			text, mFunction.str(), mParam1.str(), mParam2.str(), mOperator.str(), mComparand.str(), mConnective.str());
 
 	auto function = RE::SCRIPT_FUNCTION::LocateScriptCommand(mFunction.str().data());
