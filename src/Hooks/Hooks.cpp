@@ -131,9 +131,8 @@ namespace DDR
 
 	RE::UI_MESSAGE_RESULTS DialogueMenuEx::ProcessMessageEx(RE::UIMessage& a_message)
 	{
+		static std::map<RE::FormID, std::string> cache{};
 		static RE::FormID _activeRootId{ 0 };
-		static std::unordered_map<RE::FormID, std::string> cache;
-		static RE::FormID _activeRootId = 0;
 		const auto menu = RE::MenuTopicManager::GetSingleton();
 		const auto manager = DialogueManager::GetSingleton();
 		const auto rootId = menu->rootTopicInfo ? menu->rootTopicInfo->GetFormID() : 0xFFFFFFFF;
@@ -148,7 +147,7 @@ namespace DDR
 				cache.clear();
 			}
 			if (const auto dialogue = menu->dialogueList) {
-				#pragma warning(suppress : 4834)
+#pragma warning(suppress : 4834)
 				for (auto it = dialogue->begin(); it != dialogue->end(); it++) {
 					const auto activeTopic = *it;
 					if (!activeTopic) {
