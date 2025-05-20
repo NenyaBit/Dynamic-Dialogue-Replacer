@@ -20,9 +20,12 @@ namespace Conditions
 		template <typename T = RE::TESForm>
 		T* Lookup(const std::string& a_key) const
 		{
+			if (a_key.empty()) {
+				return nullptr;
+			}
 			if (refMap.contains(a_key)) {
 				const auto ret = refMap.at(a_key);
-        return ret->As<T>();
+				return ret->As<T>();
 			}
 			auto ref = Util::FormFromString<T>(a_key);
 			if (!ref) {
