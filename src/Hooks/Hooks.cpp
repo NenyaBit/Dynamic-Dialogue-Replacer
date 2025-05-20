@@ -134,9 +134,17 @@ namespace DDR
 		static std::unordered_map<RE::FormID, std::string> cache;
 		const auto menu = RE::MenuTopicManager::GetSingleton();
 		const auto manager = DialogueManager::GetSingleton();
+		const auto rootId = menu->rootTopicInfo ? menu->rootTopicInfo->GetFormID() : 0xFFFFFFFF;
 		switch (*a_message.type) {
 		case RE::UI_MESSAGE_TYPE::kShow:
 		case RE::UI_MESSAGE_TYPE::kUpdate:
+			_activeRootId = 0;
+			__fallthrough;
+		default:
+			if (_activeRootId != rootId) {
+				_activeRootId = rootId;
+				cache.clear();
+			}
 			if (const auto dialogue = menu->dialogueList) {
 #pragma warning(suppress : 4834)
 				for (auto it = dialogue->begin(); it != dialogue->end(); it++) {
@@ -165,7 +173,9 @@ namespace DDR
 				}
 			}
 			break;
+		case RE::UI_MESSAGE_TYPE::kForceHide:
 		case RE::UI_MESSAGE_TYPE::kHide:
+			_activeRootId = 0;
 			cache.clear();
 			break;
 		}
