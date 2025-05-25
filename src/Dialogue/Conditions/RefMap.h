@@ -41,7 +41,11 @@ namespace Conditions
 		RE::FormID LookupId(const std::string& a_key) const
 		{
 			const auto ref = Lookup(a_key);
-			return ref ? ref->GetFormID() : 0;
+			if (ref) {
+				return ref->GetFormID();
+			}
+			logger::warn("Failed to validate form for key: {} (This may be expected for Topic Infos)", a_key);
+			return Util::FormFromString(a_key);
 		}
 
 	public:
