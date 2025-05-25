@@ -22,6 +22,7 @@ namespace DDR
 			}
 			const std::string fileName = entry.path().string();
 			try {
+				logger::info("Loading file {}", fileName);
 				const auto file = YAML::LoadFile(fileName);
 				const auto refs = file["refMap"].as<std::map<std::string, std::string>>(std::map<std::string, std::string>{});
 				const Conditions::RefMap refMap{ refs };
@@ -49,6 +50,7 @@ namespace DDR
 		if (!node.IsDefined() || !node.IsSequence()) {
 			return 0;
 		}
+		logger::info("Loading TopicInfo replacements");
 		size_t responses = 0;
 		for (const auto&& it : node) {
 			try {
@@ -70,6 +72,7 @@ namespace DDR
 		if (!node.IsDefined() || !node.IsSequence()) {
 			return 0;
 		}
+		logger::info("Loading Topic replacements");
 		size_t topics = 0;
 		for (const auto&& it : node) {
 			try {
