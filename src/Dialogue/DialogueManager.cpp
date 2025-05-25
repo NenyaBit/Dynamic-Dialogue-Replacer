@@ -23,7 +23,7 @@ namespace DDR
 			const std::string fileName = entry.path().string();
 			try {
 				const auto file = YAML::LoadFile(fileName);
-				const auto refs = file["refs"].as<std::vector<std::pair<std::string, std::string>>>(std::vector<std::pair<std::string, std::string>>{});
+				const auto refs = file["refMap"].as<std::map<std::string, std::string>>(std::map<std::string, std::string>{});
 				const Conditions::RefMap refMap{ refs };
 				size_t responses = ParseResponses(file, refMap);
 				size_t topics = ParseTopics(file, refMap);

@@ -49,7 +49,7 @@ namespace Conditions
 		}
 
 	public:
-		RefMap(const std::vector<std::pair<std::string, std::string>>& a_rawRefs)
+		RefMap(const std::map<std::string, std::string>& a_rawRefs)
 		{
 			refMap["player"] = RE::PlayerCharacter::GetSingleton();
 			for (const auto& [key, refStr] : a_rawRefs) {
