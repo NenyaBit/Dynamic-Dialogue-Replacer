@@ -51,10 +51,15 @@ namespace Conditions
 	public:
 		RefMap(const std::map<std::string, std::string>& a_rawRefs)
 		{
+			if (a_rawRefs.size() > 0) {
+				logger::info("Loading reference map ({} raw entries)", a_rawRefs.size());
+			}
 			refMap["player"] = RE::PlayerCharacter::GetSingleton();
 			for (const auto& [key, refStr] : a_rawRefs) {
 				if (auto ref = Lookup<RE::TESForm>(refStr)) {
 					refMap[key] = ref;
+				} else {
+					logger::error("Failed to validate RefMap value: '{}'. Entry ignored.", refStr);
 				}
 			}
 		}
