@@ -98,7 +98,9 @@ RE::TESConditionItem* ConditionParser::Parse(std::string_view a_text, const RefM
 	}
 
 	if (!refStr.empty()) {
-		if (const auto ref = a_refMap.Lookup<RE::TESObjectREFR>(refStr)) {
+		if (Util::CastLower(refStr) == "target"s) {
+			data.object = RE::CONDITIONITEMOBJECT::kTarget;
+		} else if (const auto ref = a_refMap.Lookup<RE::TESObjectREFR>(refStr)) {
 			data.runOnRef = ref->CreateRefHandle();
 			data.object = RE::CONDITIONITEMOBJECT::kRef;
 		} else {
