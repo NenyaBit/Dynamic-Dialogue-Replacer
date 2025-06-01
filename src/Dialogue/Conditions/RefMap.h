@@ -27,17 +27,13 @@ namespace Conditions
 			auto ref = Util::FormFromString<T>(a_key);
 			if (!ref) {
 				ref = RE::TESForm::LookupByEditorID<T>(a_key);
-				if (!ref) {
-					logger::error("Failed to lookup form for key: {}", a_key);
-					return nullptr;
-				}
 			}
 			return ref;
 		}
 
 		RE::FormID LookupId(const std::string& a_key) const
 		{
-			if (a_key.empty()) {
+			if (a_key.empty() or a_key == "0"s) {
 				return 0;
 			}
 			const auto ref = Lookup(a_key);
