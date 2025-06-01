@@ -80,7 +80,7 @@ RE::TESConditionItem* ConditionParser::Parse(std::string_view a_text, const RefM
 
 	if (mComparand.matched) {
 		auto comparand = mComparand.str();
-		if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(comparand)) {
+		if (auto global = a_refMap.Lookup<RE::TESGlobal>(comparand)) {
 			data.comparisonValue.g = global;
 			data.flags.global = true;
 		} else {
