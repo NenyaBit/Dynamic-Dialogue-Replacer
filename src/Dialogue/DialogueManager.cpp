@@ -180,7 +180,7 @@ namespace DDR
 			for (const auto& repl : replacements) {
 				if (a_preprocessing && !repl->HasPreProcessingAction())
 					continue;
-				if (repl->ConditionsMet(player, a_target)) {
+				if (repl->ConditionsMet(a_target, player)) {
 					ret.push_back(repl);
 				}
 			}
