@@ -80,7 +80,7 @@ RE::TESConditionItem* ConditionParser::Parse(std::string_view a_text, const RefM
 
 	if (mComparand.matched) {
 		auto comparand = mComparand.str();
-		if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(comparand)) {
+		if (auto global = a_refMap.Lookup<RE::TESGlobal>(comparand)) {
 			data.comparisonValue.g = global;
 			data.flags.global = true;
 		} else {
@@ -102,7 +102,7 @@ RE::TESConditionItem* ConditionParser::Parse(std::string_view a_text, const RefM
 			data.runOnRef = ref->CreateRefHandle();
 			data.object = RE::CONDITIONITEMOBJECT::kRef;
 		} else {
-			logger::info("failed to find ref {}", refStr);
+			throw std::runtime_error(std::format("Failed to parse subject form: {}", refStr));
 		}
 	}
 
@@ -160,7 +160,7 @@ ConditionParser::ConditionParam ConditionParser::ParseParam(const std::string& a
 		param.str = new RE::BSString(a_text.c_str());
 		break;
 	default:
-		param.form = a_refMap.Lookup(textCIS);
+		param.form = a_refMap.Lookup(a_text);
 		break;
 	}
 	return param;

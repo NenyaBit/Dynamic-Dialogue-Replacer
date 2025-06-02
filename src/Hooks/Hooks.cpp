@@ -36,7 +36,7 @@ namespace DDR
 
 		DialogueMenuEx::Install();
 
-		logger::info("installed hooks");
+		logger::info("Installed hooks");
 	}
 
 	int64_t Hooks::PopulateTopicInfo(int64_t a_1, RE::TESTopic* a_2, RE::TESTopicInfo* a_3, RE::Character* a_speaker, RE::TESTopicInfo::ResponseData* a_5)
