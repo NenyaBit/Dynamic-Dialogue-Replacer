@@ -133,28 +133,27 @@ std::shared_ptr<RE::TESCondition> ConditionParser::ParseConditions(const std::ve
 ConditionParser::ConditionParam ConditionParser::ParseParam(const std::string& a_text, RE::SCRIPT_PARAM_TYPE a_type, const RefMap& a_refMap)
 {
 	ConditionParam param{};
-	auto textCIS = Util::CastUpper(a_text);
 	switch (a_type) {
 	case RE::SCRIPT_PARAM_TYPE::kChar:
 	case RE::SCRIPT_PARAM_TYPE::kInt:
 	case RE::SCRIPT_PARAM_TYPE::kStage:
 	case RE::SCRIPT_PARAM_TYPE::kRelationshipRank:
-		param.i = std::stoi(textCIS);
+		param.i = std::stoi(a_text);
 		break;
 	case RE::SCRIPT_PARAM_TYPE::kFloat:
-		param.f = std::stof(textCIS);
+		param.f = std::stof(a_text);
 		break;
 	case RE::SCRIPT_PARAM_TYPE::kActorValue:
-		param.i = std::to_underlying(EnumLookup::LookupActorValue(textCIS));
+		param.i = std::to_underlying(EnumLookup::LookupActorValue(a_text));
 		break;
 	case RE::SCRIPT_PARAM_TYPE::kAxis:
-		param.i = EnumLookup::LookupAxis(textCIS);
+		param.i = EnumLookup::LookupAxis(a_text);
 		break;
 	case RE::SCRIPT_PARAM_TYPE::kSex:
-		param.i = EnumLookup::LookupSex(textCIS);
+		param.i = EnumLookup::LookupSex(a_text);
 		break;
 	case RE::SCRIPT_PARAM_TYPE::kCastingSource:
-		param.i = std::to_underlying(EnumLookup::LookupCastingSource(textCIS));
+		param.i = std::to_underlying(EnumLookup::LookupCastingSource(a_text));
 		break;
 	case RE::SCRIPT_PARAM_TYPE::kVMScriptVar:
 		param.str = new RE::BSString(a_text.c_str());

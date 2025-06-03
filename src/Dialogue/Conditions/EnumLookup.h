@@ -7,49 +7,53 @@ class EnumLookup
 public:
 	EnumLookup() = delete;
 
-	static auto LookupActorValue(const std::string& a_uppercase) -> RE::ActorValue
+	static auto LookupActorValue(const std::string& a_str) -> RE::ActorValue
 	{
-		if (auto it = ActorValueLookup.find(a_uppercase); it != ActorValueLookup.end()) {
+		if (auto it = ActorValueLookup.find(a_str); it != ActorValueLookup.end()) {
 			return it->second;
 		} else {
 			return RE::ActorValue::kNone;
 		}
 	}
 
-	static auto LookupAxis(const std::string& a_uppercase) -> std::int32_t
+	static auto LookupAxis(const std::string& a_str) -> std::int32_t
 	{
-		if (a_uppercase == "X"s) {
+		assert(a_str.empty() == false);
+		switch (std::toupper(a_str.front())) {
+		case 'X':
 			return 0;
-		} else if (a_uppercase == "Y"s) {
+		case 'Y':
 			return 1;
-		} else if (a_uppercase == "Z"s) {
+		case 'Z':
 			return 2;
-		} else {
+		default:
 			return -1;
 		}
 	}
 
-	static auto LookupCastingSource(const std::string& a_uppercase)
+	static auto LookupCastingSource(std::string a_str)
 		-> RE::MagicSystem::CastingSource
 	{
-		if (a_uppercase == "LEFT"s) {
+		Util::ToUpper(a_str);
+		if (a_str == "LEFT"s) {
 			return RE::MagicSystem::CastingSource::kLeftHand;
-		} else if (a_uppercase == "RIGHT"s) {
+		} else if (a_str == "RIGHT"s) {
 			return RE::MagicSystem::CastingSource::kRightHand;
-		} else if (a_uppercase == "VOICE"s) {
+		} else if (a_str == "VOICE"s) {
 			return RE::MagicSystem::CastingSource::kOther;
-		} else if (a_uppercase == "INSTANT"s) {
+		} else if (a_str == "INSTANT"s) {
 			return RE::MagicSystem::CastingSource::kInstant;
 		} else {
 			return static_cast<RE::MagicSystem::CastingSource>(-1);
 		}
 	}
 
-	static auto LookupSex(const std::string& a_uppercase) -> RE::SEX
+	static auto LookupSex(std::string a_str) -> RE::SEX
 	{
-		if (a_uppercase == "MALE"s) {
+		Util::ToUpper(a_str);
+		if (a_str == "MALE"s) {
 			return RE::SEX::kMale;
-		} else if (a_uppercase == "FEMALE"s) {
+		} else if (a_str == "FEMALE"s) {
 			return RE::SEX::kFemale;
 		} else {
 			return static_cast<RE::SEX>(-1);
@@ -57,7 +61,15 @@ public:
 	}
 
 private:
-	inline static const std::map<std::string, RE::ActorValue> ActorValueLookup{
+	struct StringCmp
+	{
+		bool operator()(const std::string& a_lhs, const std::string& a_rhs) const
+		{
+			return _strcmpi(a_lhs.c_str(), a_rhs.c_str()) < 0;
+		}
+	};
+
+	inline static const std::map<std::string, RE::ActorValue, StringCmp> ActorValueLookup{
 		{ "AGGRESSION"s, RE::ActorValue::kAggression },
 		{ "CONFIDENCE"s, RE::ActorValue::kConfidence },
 		{ "ENERGY"s, RE::ActorValue::kEnergy },

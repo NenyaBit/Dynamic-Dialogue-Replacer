@@ -2,12 +2,17 @@
 
 namespace Util
 {
+	static inline bool HasHexPrefix(const std::string_view& a_string)
+	{
+		return a_string.size() > 1 && (a_string[0] == '0' && (a_string[1] == 'x' || a_string[1] == 'X'));
+	}
+
 	static inline RE::FormID FormFromString(const std::string_view& a_string, int base)
 	{
 		const auto split = a_string.find('|');
 		const auto formIdStr = a_string.substr(0, split);
 		RE::FormID formid;
-		const auto offset = a_string.starts_with("0x") ? 2 : 0;
+		const auto offset = HasHexPrefix(a_string) ? 2 : 0;
 		const auto [ptr, res] = std::from_chars(
 				formIdStr.data() + offset,
 				formIdStr.data() + formIdStr.size(),
@@ -24,7 +29,7 @@ namespace Util
 
 	static inline RE::FormID FormFromString(const std::string_view& a_string)
 	{
-		const auto base = a_string.starts_with("0x") ? 16 : 10;
+		const auto base = HasHexPrefix(a_string) ? 16 : 10;
 		return FormFromString(a_string, base);
 	}
 
@@ -38,7 +43,7 @@ namespace Util
 	template <typename T, typename = std::enable_if_t<!std::is_pointer_v<T>>>
 	static inline T* FormFromString(const std::string_view& a_string)
 	{
-		const auto base = a_string.starts_with("0x") ? 16 : 10;
+		const auto base = HasHexPrefix(a_string) ? 16 : 10;
 		return FormFromString<T>(a_string, base);
 	}
 
